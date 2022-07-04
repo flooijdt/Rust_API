@@ -8,8 +8,6 @@ fn main() {
 
     // println!("{}",json_response);
 
-
-
     let response_csv = reqwest::blocking::get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").expect("unable to get the origin csv.");
     let mut rdr= csv::Reader::from_reader(response_csv);
 
@@ -18,7 +16,7 @@ fn main() {
     for result in rdr.records() {
         // An error may occur, so abort the program in an unfriendly way.
         // We will make this more friendly later!
-        let record = result.expect("a CSV record");
+        let record = result.expect("failed to get CSV row (record).");
         // Print a debug version of the record.
         println!("{:#?}", record);
     }
