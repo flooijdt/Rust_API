@@ -9,4 +9,5 @@ edition = "2021"
 reqwest = { version = "*", features = ["blocking"] }
 serde_json = "*"
 csv = "*"
-serde = "*"
+serde = { version = "1.0.138", features = ["derive"] }
+tuple = "*"
