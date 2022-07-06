@@ -121,7 +121,7 @@ fn main() {
        picture__medium: String,
        picture__thumbnail: String,
     }
-    // convert clients to Client struct.
+    // convert ClientCSV to Client struct.
     for result in rdr.deserialize(){
         let mut result: ClientCSV = result.unwrap();
         result = result.clone();
