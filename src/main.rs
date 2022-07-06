@@ -10,18 +10,18 @@ fn main() {
     let response_json = reqwest::blocking::get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").expect("unable to get the origin json.");
     // convert Response to json.
     let mut json: Value = serde_json::from_reader(response_json).expect("unable to parse json from the Response's body.");
-    // create list with for Client_json structs.
-    let mut json_clients_list: Vec<Client_json> = Vec::new();
+    // create list with for Client structs.
+    let mut json_clients_list: Vec<Client> = Vec::new();
     // clone json as an array for iteration.
     let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
     // iterate json_array in order to fill json_clients_list.
     for object in json_array.as_array() {
         for objectling in object {
-            let client = Client_json::new(objectling.clone());
+            let client = Client::new(objectling.clone());
             json_clients_list.push(client);
         }
     }
-// create Client_json struct and sub-structs for easier data manipulation.
+// create Client struct and sub-structs for easier data manipulation.
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Dob {
         age: u32,
@@ -72,7 +72,7 @@ fn main() {
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Client_json {
+    struct Client {
             cell: String,
             dob: Dob,
             email: String,
@@ -84,9 +84,9 @@ fn main() {
             registered: Registered,
         }
 
-    impl Client_json {
+    impl Client {
         fn new(value: Value) -> Self{
-            let client: Client_json = serde_json::from_value(value).unwrap();
+            let client: Client = serde_json::from_value(value).unwrap();
             client
         }
     }
@@ -97,7 +97,7 @@ fn main() {
     let mut rdr= csv::Reader::from_reader(response_csv);
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Client {
+    struct ClientCSV {
        gender: String,
        name__title: String,
        name__first: String,
@@ -123,9 +123,9 @@ fn main() {
     }
     // convert clients to Client struct.
     for result in rdr.deserialize(){
-        let mut result: Client = result.unwrap();
+        let mut result: ClientCSV = result.unwrap();
         result = result.clone();
-        let mut result: Client_json = Client_json {
+        let mut result: Client = Client {
             cell: result.cell,
             dob: Dob {
                 age: result.dob__age,
@@ -163,9 +163,8 @@ fn main() {
         	date: result.registered__date,
     	    },
         };
-    
         println!("{:#?}", &result);
-        
+        json_clients_list.push(result);
     }
     // convert Clients and Clients_json to desired output.
     
