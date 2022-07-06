@@ -11,3 +11,4 @@ serde_json = "*"
 csv = "*"
 serde = { version = "1.0.138", features = ["derive"] }
 tuple = "*"
+json = "*"
