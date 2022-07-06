@@ -3,9 +3,10 @@
 [*] parse json into Value;
 [*] get CSV;
 [*] parse CSV into Reader;
-[] parse clients as struct;
-[] classify clients by lat/long;
+[*] parse clients as struct;
+[] convert csvs; 
 [] convert required fields;
+  [] adicionar regiao do país
 [] create database;
 [] Create API;
 [] add pagination to API;

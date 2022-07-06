@@ -96,7 +96,7 @@ fn main() {
     // convert response to Reader, for file tempering.
     let mut rdr= csv::Reader::from_reader(response_csv);
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Client {
        gender: String,
        name__title: String,
@@ -123,9 +123,51 @@ fn main() {
     }
     // convert clients to Client struct.
     for result in rdr.deserialize(){
-        let result: Client = result.expect("error deserializing clients into structs.");
-        println!("{:#?}", result);
+        let mut result: Client = result.unwrap();
+        result = result.clone();
+        let mut result: Client_json = Client_json {
+            cell: result.cell,
+            dob: Dob {
+                age: result.dob__age,
+                date: result.dob__date,
+            },
+            email: result.email,
+            gender: result.gender,
+            location: Location {
+                city: result.location__city,
+                coordinates: Coordinates {
+                    latitude: result.location__coordinates__latitude.to_string(),
+                    longitude: result.location__coordinates__longitude.to_string(),
+                },
+                postcode: result.location__postcode,
+                state: result.location__state,
+                street: result.location__street,
+                timezone: Timezone {
+                    description: result.location__timezone__description,
+                    offset: result.location__timezone__offset,
+                    },
+            },
+            name: Name {
+                first: result.name__first,
+                last: result.name__last,
+                title:result.name__title,
+            },
+            phone: result.phone,
+            picture: Picture {
+        	large: result.picture__large,
+        	medium: result.picture__medium,
+        	thumbnail: result.picture__thumbnail,
+	        },
+            registered: Registered {
+        	age: result.registered__age,
+        	date: result.registered__date,
+    	    },
+        };
+    
+        println!("{:#?}", &result);
+        
     }
-
+    // convert Clients and Clients_json to desired output.
+    
 
 }
