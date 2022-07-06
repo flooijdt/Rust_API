@@ -11,13 +11,13 @@ fn main() {
     // convert Response to json.
     let mut json: Value = serde_json::from_reader(response_json).expect("unable to parse json from the Response's body.");
     // create list with for Client structs.
-    let mut json_clients_list: Vec<Client> = Vec::new();
+    let mut json_clients_list: Vec<ClientUnited> = Vec::new();
     // clone json as an array for iteration.
     let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
     // iterate json_array in order to fill json_clients_list.
     for object in json_array.as_array() {
         for objectling in object {
-            let client = Client::new(objectling.clone());
+            let client = ClientUnited::new(objectling.clone());
             json_clients_list.push(client);
         }
     }
@@ -72,7 +72,7 @@ fn main() {
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Client {
+    struct ClientUnited {
             cell: String,
             dob: Dob,
             email: String,
@@ -84,9 +84,9 @@ fn main() {
             registered: Registered,
         }
 
-    impl Client {
+    impl ClientUnited {
         fn new(value: Value) -> Self{
-            let client: Client = serde_json::from_value(value).unwrap();
+            let client: ClientUnited = serde_json::from_value(value).unwrap();
             client
         }
     }
@@ -125,7 +125,7 @@ fn main() {
     for result in rdr.deserialize(){
         let mut result: ClientCSV = result.unwrap();
         result = result.clone();
-        let mut result: Client = Client {
+        let mut result: ClientUnited = ClientUnited {
             cell: result.cell,
             dob: Dob {
                 age: result.dob__age,
@@ -166,7 +166,53 @@ fn main() {
         println!("{:#?}", &result);
         json_clients_list.push(result);
     }
-    // convert Clients and Clients_json to desired output.
-    
+
+    // convert Clients fields to desired output.
+    struct Client {
+        type: "laborious",
+        gender: "m",
+        name: {
+            title: "mr",
+            first: "quirilo",
+            last: "nascimento"
+        },
+        location: {
+            region: "sul",
+            street: "680 rua treze ",
+            city: "varginha",
+            state: "paraná",
+            postcode: 37260,
+            coordinates: {
+                latitude: "-46.9519",
+                longitude: "-57.4496"
+            },
+            timezone: {
+                offset: "+8:00",
+                description: "Beijing, Perth, Singapore, Hong Kong"
+            }
+        },
+        email: "quirilo.nascimento@example.com",
+        birthday: "1979-01-22T03:35:31Z",
+        registered: "2005-07-01T13:52:48Z",
+        telephoneNumbers: [
+            "+556629637520"
+        ],
+        mobileNumbers: [
+            "+553270684089"
+        ],
+        picture: {
+            "large": "https://randomuser.me/api/portraits/men/83.jpg",
+            "medium": "https://randomuser.me/api/portraits/med/men/83.jpg",
+            "thumbnail": "https://randomuser.me/api/portraits/thumb/men/83.jpg"
+        },
+        nationality: "BR"
+      }
+
+
+    for client in json_clients_list.iter() {
+        client = 
+    }
+
+
 
 }
