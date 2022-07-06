@@ -167,7 +167,8 @@ fn main() {
         json_clients_list.push(result);
     }
 
-    // convert Clients fields to desired output.
+    // create final Client struct according to desired output.
+    #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Client {
         type: String,
         gender: String,
@@ -208,9 +209,47 @@ fn main() {
         nationality: String
     }
 
-
     for client in json_clients_list.iter() {
-        client = 
+        let client: Client = Client {
+            type: "placeholder",
+            gender: client.gender,
+            name: {
+                title: client.name.title,
+                first: client.name.first,
+                last: client.name.last
+            },
+            location: {
+                region: "placeholder",
+                street: client.location.street,
+                city: client.location.city,
+                state: client.location.state,
+                postcode: client.location.postcode,
+                coordinates: {
+                    latitude: client.location.coordinates.latitude,
+                    longitude: client.location.coordinates.longitude
+                },
+                timezone: {
+                    offset: client.location.timezone.offset,
+                    description: client.location.timezone.description
+                }
+            },
+            email: client.email,
+            birthday: client.dob.date,
+            registered: client.registered.date,
+            telephoneNumbers: [
+                client.phone
+            ],
+            mobileNumbers: [
+                client.cell
+            ],
+            picture: {
+                large: client.picture.large,
+                medium: client.picture.medium,
+                thumbnail: client.picture.thumbnail
+            },
+            nationality: "placeholder"
+        }
+
     }
 
 
