@@ -170,24 +170,24 @@ fn main() {
     // create final Client struct according to desired output.
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Client {
-        type: String,
+        r#type: String,
         gender: String,
-        name: {
+        name: Name {
             title: String,
             first: String,
             last: String
         },
-        location: {
+        location: Location2 {
             region: String,
             street: String,
             city: String,
             state: String,
             postcode: u32,
-            coordinates: {
+            coordinates: Coordinates {
                 latitude: String,
                 longitude: String
             },
-            timezone: {
+            timezone: Timezone {
                 offset: String,
                 description: String
             }
@@ -201,34 +201,43 @@ fn main() {
         mobileNumbers: [
             String
         ],
-        picture: {
+        picture: Picture {
             large: String,
             medium: String,
             thumbnail: String
         },
         nationality: String
     }
+     struct Location2 {
+        region: String,
+        city: String,
+        coordinates: Coordinates,
+        postcode: u32,
+        state: String,
+        street: String,
+        timezone: Timezone,
+    }
 
     for client in json_clients_list.iter() {
-        let client: Client = Client {
-            type: "placeholder",
+        let mut client: Client = Client {
+            r#type: "placeholder",
             gender: client.gender,
-            name: {
+            name: Name {
                 title: client.name.title,
                 first: client.name.first,
                 last: client.name.last
             },
-            location: {
+            location: Location2 {
                 region: "placeholder",
                 street: client.location.street,
                 city: client.location.city,
                 state: client.location.state,
                 postcode: client.location.postcode,
-                coordinates: {
+                coordinates: Coordinates {
                     latitude: client.location.coordinates.latitude,
                     longitude: client.location.coordinates.longitude
                 },
-                timezone: {
+                timezone: Timezone {
                     offset: client.location.timezone.offset,
                     description: client.location.timezone.description
                 }
@@ -249,6 +258,26 @@ fn main() {
             },
             nationality: "BR"
         }:
+        
+        if client.location.state == "rio grande do sul" || "santa catarina" || "paraná" {
+        client.location.region = "sul";
+        }
+        if client.location.state == "espírito santo" || "rio de janeiro" || "minas gerais" || "são paulo" {
+        client.location.region = "sudeste";
+        }
+        if client.location.state == "mato grosso" || "mato grosso do sul" || "goiás" || "distrito federal" {
+        client.location.region = "centro-oeste";
+        }
+        if client.location.state == "acre" || "amazonas" || "rondônia" || "amapá" || "roraima" || "pará" || "tocantins" {
+        client.location.region = "norte";
+        }
+        if client.location.state == "bahia" || "sergipe" || "alagoas" || "paraíba" || "pernambuco" || "rio grande do norte" || "ceará" || "piauí" || "maranhão" {
+        client.location.region = "nordeste";
+        }
+
+
+
+
 
     }
 
