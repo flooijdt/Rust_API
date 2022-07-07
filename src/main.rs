@@ -224,8 +224,6 @@ fn main() {
         maxlat: -46.603598,
     };
 
-
-
     for client in json_clients_list.iter() {
         let client = client.clone();
         let mut client: Client = Client {
@@ -303,7 +301,7 @@ fn main() {
         else {
             client.r#type = String::from("labourious");
         }
-        // correct phone format
+        // correct phone format.
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace("(", "");
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(")", "");
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(" ", "");
@@ -311,6 +309,14 @@ fn main() {
         let mut brcode: String = String::from("+55");
         brcode.push_str(client.telephoneNumbers[0].clone().as_str());
         client.telephoneNumbers[0] = brcode;
+        // correct mobile numbers.
+        client.mobileNumbers[0] = client.mobileNumbers[0].replace("(", "");
+        client.mobileNumbers[0] = client.mobileNumbers[0].replace(")", "");
+        client.mobileNumbers[0] = client.mobileNumbers[0].replace(" ", "");
+        client.mobileNumbers[0] = client.mobileNumbers[0].replace("-", "");
+        let mut brcode: String = String::from("+55");
+        brcode.push_str(client.mobileNumbers[0].clone().as_str());
+        client.mobileNumbers[0] = brcode;
 
 
         println!("{:#?}", &client);
