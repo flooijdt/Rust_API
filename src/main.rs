@@ -247,8 +247,8 @@ fn main() {
                 medium: client.picture.medium,
                 thumbnail: client.picture.thumbnail
             },
-            nationality: "placeholder"
-        }
+            nationality: "BR"
+        }:
 
     }
 
