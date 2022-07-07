@@ -217,6 +217,38 @@ fn main() {
         street: String,
         timezone: Timezone,
     }
+    // clasification in regard to coordinates: special, labourious or normal.
+    
+    struct LocationCorrdinates {
+        minlon: f64,
+        minlat: f64,
+        maxlon: f64,
+        maxlat: f64,
+    }
+    
+
+    let special1 = LocationCorrdinates {
+        minlon: -2.196998,
+        minlat -46.361899,
+        maxlon: -15.411580,
+        maxlat: -34.276938,
+    };
+
+    let special2 = LocationCorrdinates {
+        minlon: -19.766959,
+        minlat -52.997614,
+        maxlon: -23.966413,
+        maxlat: -44.428305,
+    };
+
+    let normal = LocationCorrdinates {
+        minlon: -26.155681,
+        minlat -54.777426,
+        maxlon: -34.016466,
+        maxlat: -46.603598,
+    };
+
+
 
     for client in json_clients_list.iter() {
         let mut client: Client = Client {
@@ -262,18 +294,22 @@ fn main() {
         if client.location.state == "rio grande do sul" || "santa catarina" || "paraná" {
         client.location.region = "sul";
         }
-        if client.location.state == "espírito santo" || "rio de janeiro" || "minas gerais" || "são paulo" {
+        else if client.location.state == "espírito santo" || "rio de janeiro" || "minas gerais" || "são paulo" {
         client.location.region = "sudeste";
         }
-        if client.location.state == "mato grosso" || "mato grosso do sul" || "goiás" || "distrito federal" {
+        else if client.location.state == "mato grosso" || "mato grosso do sul" || "goiás" || "distrito federal" {
         client.location.region = "centro-oeste";
         }
-        if client.location.state == "acre" || "amazonas" || "rondônia" || "amapá" || "roraima" || "pará" || "tocantins" {
+        else if client.location.state == "acre" || "amazonas" || "rondônia" || "amapá" || "roraima" || "pará" || "tocantins" {
         client.location.region = "norte";
         }
-        if client.location.state == "bahia" || "sergipe" || "alagoas" || "paraíba" || "pernambuco" || "rio grande do norte" || "ceará" || "piauí" || "maranhão" {
+        else if client.location.state == "bahia" || "sergipe" || "alagoas" || "paraíba" || "pernambuco" || "rio grande do norte" || "ceará" || "piauí" || "maranhão" {
         client.location.region = "nordeste";
         }
+        
+    if special1.minlat <= client.location.coordinates.latitude <= special1.maxlat && special1.minlon <= client.location.coordinates.longitude <= special1.maxlon {
+        client.r#type = "special";
+    }
 
 
 
