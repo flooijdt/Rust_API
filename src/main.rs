@@ -172,42 +172,18 @@ fn main() {
     struct Client {
         r#type: String,
         gender: String,
-        name: Name {
-            title: String,
-            first: String,
-            last: String
-        },
-        location: Location2 {
-            region: String,
-            street: String,
-            city: String,
-            state: String,
-            postcode: u32,
-            coordinates: Coordinates {
-                latitude: String,
-                longitude: String
-            },
-            timezone: Timezone {
-                offset: String,
-                description: String
-            }
-        },
+        name: Name,
+        location: Location2,
         email: String,
         birthday: String,
         registered: String,
-        telephoneNumbers: [
-            String
-        ],
-        mobileNumbers: [
-            String
-        ],
-        picture: Picture {
-            large: String,
-            medium: String,
-            thumbnail: String
-        },
+        telephoneNumbers: Vec<String>,
+        mobileNumbers: Vec<String>,
+        picture: Picture,
         nationality: String
     }
+
+    #[derive(Debug, Deserialize, Clone, Serialize)]
      struct Location2 {
         region: String,
         city: String,
@@ -229,21 +205,21 @@ fn main() {
 
     let special1 = LocationCorrdinates {
         minlon: -2.196998,
-        minlat -46.361899,
+        minlat: -46.361899,
         maxlon: -15.411580,
         maxlat: -34.276938,
     };
 
     let special2 = LocationCorrdinates {
         minlon: -19.766959,
-        minlat -52.997614,
+        minlat: -52.997614,
         maxlon: -23.966413,
         maxlat: -44.428305,
     };
 
     let normal = LocationCorrdinates {
         minlon: -26.155681,
-        minlat -54.777426,
+        minlat: -54.777426,
         maxlon: -34.016466,
         maxlat: -46.603598,
     };
@@ -252,7 +228,7 @@ fn main() {
 
     for client in json_clients_list.iter() {
         let mut client: Client = Client {
-            r#type: "placeholder",
+            r#type: String::from("placeholder"),
             gender: client.gender,
             name: Name {
                 title: client.name.title,
@@ -260,7 +236,7 @@ fn main() {
                 last: client.name.last
             },
             location: Location2 {
-                region: "placeholder",
+                region: String::from("placeholder"),
                 street: client.location.street,
                 city: client.location.city,
                 state: client.location.state,
@@ -277,44 +253,50 @@ fn main() {
             email: client.email,
             birthday: client.dob.date,
             registered: client.registered.date,
-            telephoneNumbers: [
+            telephoneNumbers: vec![
                 client.phone
             ],
-            mobileNumbers: [
+            mobileNumbers: vec![
                 client.cell
             ],
-            picture: {
+            picture: Picture {
                 large: client.picture.large,
                 medium: client.picture.medium,
                 thumbnail: client.picture.thumbnail
             },
-            nationality: "BR"
-        }:
+            nationality: String::from("BR")
+        };
         
-        if client.location.state == "rio grande do sul" || "santa catarina" || "paraná" {
-        client.location.region = "sul";
+        if client.location.state == "rio grande do sul" || client.location.state == "santa catarina" || client.location.state == "paraná" {
+        client.location.region = String::from("sul");
         }
-        else if client.location.state == "espírito santo" || "rio de janeiro" || "minas gerais" || "são paulo" {
-        client.location.region = "sudeste";
+        else if client.location.state == "espírito santo" || client.location.state == "rio de janeiro" || client.location.state == "minas gerais" || client.location.state == "são paulo" {
+        client.location.region = String::from("sudeste");
         }
-        else if client.location.state == "mato grosso" || "mato grosso do sul" || "goiás" || "distrito federal" {
-        client.location.region = "centro-oeste";
+        else if client.location.state == "mato grosso" || client.location.state == "mato grosso do sul" || client.location.state == "goiás" || client.location.state == "distrito federal" {
+        client.location.region = String::from("centro-oeste");
         }
-        else if client.location.state == "acre" || "amazonas" || "rondônia" || "amapá" || "roraima" || "pará" || "tocantins" {
-        client.location.region = "norte";
+        else if client.location.state == "acre" || client.location.state == "amazonas" || client.location.state == "rondônia" || client.location.state == "amapá" || client.location.state == "roraima" || client.location.state == "pará" || client.location.state == "tocantins" {
+        client.location.region = String::from("norte");
         }
-        else if client.location.state == "bahia" || "sergipe" || "alagoas" || "paraíba" || "pernambuco" || "rio grande do norte" || "ceará" || "piauí" || "maranhão" {
-        client.location.region = "nordeste";
+        else if client.location.state == "bahia" || client.location.state == "sergipe" || client.location.state == "alagoas" || client.location.state == "paraíba" || client.location.state == "pernambuco" || client.location.state == "rio grande do norte" || client.location.state == "ceará" || client.location.state == "piauí" || client.location.state == "maranhão" {
+        client.location.region = String::from("nordeste");
         }
         
-    if special1.minlat <= client.location.coordinates.latitude <= special1.maxlat && special1.minlon <= client.location.coordinates.longitude <= special1.maxlon {
-        client.r#type = "special";
-    }
+        if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap()  <= special2.maxlat && special1.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap()  && client.location.coordinates.longitude.parse::<f64>().unwrap()  <= special1.maxlon {
+            client.r#type = String::from("special");
+        }
+        else if special2.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat && special2.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap() && client.location.coordinates.longitude.parse::<f64>().unwrap() <= special2.maxlon {
+            client.r#type = String::from("special");
+        }
+        else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat && normal.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap() && client.location.coordinates.longitude.parse::<f64>().unwrap() <= normal.maxlon {
+            client.r#type = String::from("normal");
+        }
+        else {
+            client.r#type = String::from("labourious");
+        }
 
-
-
-
-
+        println!("{:#?}", &client);
     }
 
 
