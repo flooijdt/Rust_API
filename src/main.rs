@@ -163,7 +163,7 @@ fn main() {
         	date: result.registered__date,
     	    },
         };
-        println!("{:#?}", &result);
+        // println!("{:#?}", &result);
         json_clients_list.push(result);
     }
 
@@ -303,6 +303,15 @@ fn main() {
         else {
             client.r#type = String::from("labourious");
         }
+        // correct phone format
+        client.telephoneNumbers[0] = client.telephoneNumbers[0].replace("(", "");
+        client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(")", "");
+        client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(" ", "");
+        client.telephoneNumbers[0] = client.telephoneNumbers[0].replace("-", "");
+        let mut brcode: String = String::from("+55");
+        brcode.push_str(client.telephoneNumbers[0].clone().as_str());
+        client.telephoneNumbers[0] = brcode;
+
 
         println!("{:#?}", &client);
     }
