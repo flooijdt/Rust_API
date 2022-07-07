@@ -227,6 +227,7 @@ fn main() {
 
 
     for client in json_clients_list.iter() {
+        let client = client.clone();
         let mut client: Client = Client {
             r#type: String::from("placeholder"),
             gender: client.gender,
@@ -267,6 +268,13 @@ fn main() {
             nationality: String::from("BR")
         };
         
+        if client.gender == String::from("male") {
+            client.gender = String::from("m");
+        }
+        else if client.gender == String::from("female") {
+            client.gender = String::from("f");
+        }
+
         if client.location.state == "rio grande do sul" || client.location.state == "santa catarina" || client.location.state == "paraná" {
         client.location.region = String::from("sul");
         }
@@ -283,7 +291,7 @@ fn main() {
         client.location.region = String::from("nordeste");
         }
         
-        if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap()  <= special2.maxlat && special1.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap()  && client.location.coordinates.longitude.parse::<f64>().unwrap()  <= special1.maxlon {
+        if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special1.maxlat && special1.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap()  && client.location.coordinates.longitude.parse::<f64>().unwrap() <= special1.maxlon {
             client.r#type = String::from("special");
         }
         else if special2.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat && special2.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap() && client.location.coordinates.longitude.parse::<f64>().unwrap() <= special2.maxlon {
