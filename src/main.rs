@@ -3,18 +3,21 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter};
-use tokio::task;
+use warp::{Filter,Error};
+use tokio::task::spawn_blocking;
 
-fn clientslist() -> serde_json::Value {
+async fn clientslist() -> serde_json::Value {
     // get Response containing user data from source.
-    let response_json = reqwest::blocking::get(
+    
+    
+    let response_json: Value = spawn_blocking( move || {
+        reqwest::blocking::get(
         "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
     )
     .expect("unable to get the origin json.");
+    }).await.unwrap().into();
     // convert Response to json.
-    let mut json: Value = serde_json::from_reader(response_json)
-        .expect("unable to parse json from the Response's body.");
+    let mut json: Value = response_json;
     // create list with for Client structs.
     let mut json_clients_list: Vec<ClientUnited> = Vec::new();
     // clone json as an array for iteration.
@@ -96,13 +99,15 @@ fn clientslist() -> serde_json::Value {
     }
 
     // get csv containing user data from source.
-    let response_csv = reqwest::blocking::get(
+    let mut rdr: Reader<Response> = spawn_blocking( move || {
+        let mut response_csv = reqwest::blocking::get(
         "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv",
     )
     .expect("unable to get the origin csv.");
     // convert response to Reader, for file tempering.
     let mut rdr = csv::Reader::from_reader(response_csv);
-
+    rdr
+    }).await.unwrap();
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct ClientCSV {
         gender: String,
@@ -407,13 +412,11 @@ async fn main() {
         Response::new(format!("{}", self.json).into())
     }
     }
-
-    let route = spawn_blocking(move || {
+    let mut clientts = clientslist().await;
+    warp::serve(
         warp::path("clients")
-        .map(|| {
-            let clients = Replai {json: clientslist()};
-            warp::reply::json(&clients)
+        .map(move || {
+            warp::reply::json(&clientts)
     })
-    }).await;
-    warp::serve(route.unwrap()).run(([127, 0, 0, 1], 3030)).await;
+    ).run(([127, 0, 0, 1], 3030)).await;
 }
