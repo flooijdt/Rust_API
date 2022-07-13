@@ -5,8 +5,8 @@
 [*] parse CSV into Reader;
 [*] parse clients as struct;
 [*] convert csvs; 
-[] convert required fields;
-  [] adicionar regiao do país
-[] create database;
+[*] convert required fields;
+  [*] adicionar regiao do país
 [] Create API;
+[] create database;
 [] add pagination to API;

@@ -1,15 +1,20 @@
-use serde_json::{Value, Value::Object, Map};
-use json;
-use serde::{Serialize, Deserialize, de::IntoDeserializer, Deserializer};
 use csv::{self, Reader};
 use reqwest::blocking::Response;
+use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
+use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
+use warp::{Filter};
+use tokio::task;
 
-fn main() {
+fn clientslist() -> serde_json::Value {
     // get Response containing user data from source.
-    let response_json = reqwest::blocking::get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").expect("unable to get the origin json.");
+    let response_json = reqwest::blocking::get(
+        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
+    )
+    .expect("unable to get the origin json.");
     // convert Response to json.
-    let mut json: Value = serde_json::from_reader(response_json).expect("unable to parse json from the Response's body.");
+    let mut json: Value = serde_json::from_reader(response_json)
+        .expect("unable to parse json from the Response's body.");
     // create list with for Client structs.
     let mut json_clients_list: Vec<ClientUnited> = Vec::new();
     // clone json as an array for iteration.
@@ -21,13 +26,13 @@ fn main() {
             json_clients_list.push(client);
         }
     }
-// create Client struct and sub-structs for easier data manipulation.
+    // create Client struct and sub-structs for easier data manipulation.
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Dob {
         age: u32,
         date: String,
     }
-    
+
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Location {
         city: String,
@@ -36,7 +41,6 @@ fn main() {
         state: String,
         street: String,
         timezone: Timezone,
-
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -50,7 +54,7 @@ fn main() {
         description: String,
         offset: String,
     }
-    
+
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Name {
         first: String,
@@ -64,7 +68,7 @@ fn main() {
         medium: String,
         thumbnail: String,
     }
-    
+
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct Registered {
         age: u32,
@@ -73,56 +77,59 @@ fn main() {
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct ClientUnited {
-            cell: String,
-            dob: Dob,
-            email: String,
-            gender: String,
-            location: Location,
-            name: Name,
-            phone: String,
-            picture: Picture,
-            registered: Registered,
-        }
+        cell: String,
+        dob: Dob,
+        email: String,
+        gender: String,
+        location: Location,
+        name: Name,
+        phone: String,
+        picture: Picture,
+        registered: Registered,
+    }
 
     impl ClientUnited {
-        fn new(value: Value) -> Self{
+        fn new(value: Value) -> Self {
             let client: ClientUnited = serde_json::from_value(value).unwrap();
             client
         }
     }
 
     // get csv containing user data from source.
-    let response_csv = reqwest::blocking::get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").expect("unable to get the origin csv.");
+    let response_csv = reqwest::blocking::get(
+        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv",
+    )
+    .expect("unable to get the origin csv.");
     // convert response to Reader, for file tempering.
-    let mut rdr= csv::Reader::from_reader(response_csv);
+    let mut rdr = csv::Reader::from_reader(response_csv);
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
     struct ClientCSV {
-       gender: String,
-       name__title: String,
-       name__first: String,
-       name__last: String,
-       location__street: String,
-       location__city: String,
-       location__state: String,
-       location__postcode: u32,
-       location__coordinates__latitude: f64,
-       location__coordinates__longitude: f64,
-       location__timezone__offset: String,
-       location__timezone__description: String,
-       email: String,
-       dob__date: String,
-       dob__age: u32,
-       registered__date: String,
-       registered__age: u32,
-       phone: String,
-       cell: String,
-       picture__large: String,
-       picture__medium: String,
-       picture__thumbnail: String,
+        gender: String,
+        name__title: String,
+        name__first: String,
+        name__last: String,
+        location__street: String,
+        location__city: String,
+        location__state: String,
+        location__postcode: u32,
+        location__coordinates__latitude: f64,
+        location__coordinates__longitude: f64,
+        location__timezone__offset: String,
+        location__timezone__description: String,
+        email: String,
+        dob__date: String,
+        dob__age: u32,
+        registered__date: String,
+        registered__age: u32,
+        phone: String,
+        cell: String,
+        picture__large: String,
+        picture__medium: String,
+        picture__thumbnail: String,
     }
     // convert ClientCSV to Client struct.
-    for result in rdr.deserialize(){
+    for result in rdr.deserialize() {
         let mut result: ClientCSV = result.unwrap();
         result = result.clone();
         let mut result: ClientUnited = ClientUnited {
@@ -145,23 +152,23 @@ fn main() {
                 timezone: Timezone {
                     description: result.location__timezone__description,
                     offset: result.location__timezone__offset,
-                    },
+                },
             },
             name: Name {
                 first: result.name__first,
                 last: result.name__last,
-                title:result.name__title,
+                title: result.name__title,
             },
             phone: result.phone,
             picture: Picture {
-        	large: result.picture__large,
-        	medium: result.picture__medium,
-        	thumbnail: result.picture__thumbnail,
-	        },
+                large: result.picture__large,
+                medium: result.picture__medium,
+                thumbnail: result.picture__thumbnail,
+            },
             registered: Registered {
-        	age: result.registered__age,
-        	date: result.registered__date,
-    	    },
+                age: result.registered__age,
+                date: result.registered__date,
+            },
         };
         // println!("{:#?}", &result);
         json_clients_list.push(result);
@@ -180,11 +187,11 @@ fn main() {
         telephoneNumbers: Vec<String>,
         mobileNumbers: Vec<String>,
         picture: Picture,
-        nationality: String
+        nationality: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-     struct Location2 {
+    struct Location2 {
         region: String,
         city: String,
         coordinates: Coordinates,
@@ -194,14 +201,13 @@ fn main() {
         timezone: Timezone,
     }
     // clasification in regard to coordinates: special, labourious or normal.
-    
+
     struct LocationCorrdinates {
         minlon: f64,
         minlat: f64,
         maxlon: f64,
         maxlat: f64,
     }
-    
 
     let special1 = LocationCorrdinates {
         minlon: -2.196998,
@@ -232,7 +238,7 @@ fn main() {
             name: Name {
                 title: client.name.title,
                 first: client.name.first,
-                last: client.name.last
+                last: client.name.last,
             },
             location: Location2 {
                 region: String::from("placeholder"),
@@ -242,63 +248,126 @@ fn main() {
                 postcode: client.location.postcode,
                 coordinates: Coordinates {
                     latitude: client.location.coordinates.latitude,
-                    longitude: client.location.coordinates.longitude
+                    longitude: client.location.coordinates.longitude,
                 },
                 timezone: Timezone {
                     offset: client.location.timezone.offset,
-                    description: client.location.timezone.description
-                }
+                    description: client.location.timezone.description,
+                },
             },
             email: client.email,
             birthday: client.dob.date,
             registered: client.registered.date,
-            telephoneNumbers: vec![
-                client.phone
-            ],
-            mobileNumbers: vec![
-                client.cell
-            ],
+            telephoneNumbers: vec![client.phone],
+            mobileNumbers: vec![client.cell],
             picture: Picture {
                 large: client.picture.large,
                 medium: client.picture.medium,
-                thumbnail: client.picture.thumbnail
+                thumbnail: client.picture.thumbnail,
             },
-            nationality: String::from("BR")
+            nationality: String::from("BR"),
         };
-        
+
         if client.gender == String::from("male") {
             client.gender = String::from("m");
-        }
-        else if client.gender == String::from("female") {
+        } else if client.gender == String::from("female") {
             client.gender = String::from("f");
         }
 
-        if client.location.state == "rio grande do sul" || client.location.state == "santa catarina" || client.location.state == "paraná" {
-        client.location.region = String::from("sul");
+        if client.location.state == "rio grande do sul"
+            || client.location.state == "santa catarina"
+            || client.location.state == "paraná"
+        {
+            client.location.region = String::from("sul");
+        } else if client.location.state == "espírito santo"
+            || client.location.state == "rio de janeiro"
+            || client.location.state == "minas gerais"
+            || client.location.state == "são paulo"
+        {
+            client.location.region = String::from("sudeste");
+        } else if client.location.state == "mato grosso"
+            || client.location.state == "mato grosso do sul"
+            || client.location.state == "goiás"
+            || client.location.state == "distrito federal"
+        {
+            client.location.region = String::from("centro-oeste");
+        } else if client.location.state == "acre"
+            || client.location.state == "amazonas"
+            || client.location.state == "rondônia"
+            || client.location.state == "amapá"
+            || client.location.state == "roraima"
+            || client.location.state == "pará"
+            || client.location.state == "tocantins"
+        {
+            client.location.region = String::from("norte");
+        } else if client.location.state == "bahia"
+            || client.location.state == "sergipe"
+            || client.location.state == "alagoas"
+            || client.location.state == "paraíba"
+            || client.location.state == "pernambuco"
+            || client.location.state == "rio grande do norte"
+            || client.location.state == "ceará"
+            || client.location.state == "piauí"
+            || client.location.state == "maranhão"
+        {
+            client.location.region = String::from("nordeste");
         }
-        else if client.location.state == "espírito santo" || client.location.state == "rio de janeiro" || client.location.state == "minas gerais" || client.location.state == "são paulo" {
-        client.location.region = String::from("sudeste");
-        }
-        else if client.location.state == "mato grosso" || client.location.state == "mato grosso do sul" || client.location.state == "goiás" || client.location.state == "distrito federal" {
-        client.location.region = String::from("centro-oeste");
-        }
-        else if client.location.state == "acre" || client.location.state == "amazonas" || client.location.state == "rondônia" || client.location.state == "amapá" || client.location.state == "roraima" || client.location.state == "pará" || client.location.state == "tocantins" {
-        client.location.region = String::from("norte");
-        }
-        else if client.location.state == "bahia" || client.location.state == "sergipe" || client.location.state == "alagoas" || client.location.state == "paraíba" || client.location.state == "pernambuco" || client.location.state == "rio grande do norte" || client.location.state == "ceará" || client.location.state == "piauí" || client.location.state == "maranhão" {
-        client.location.region = String::from("nordeste");
-        }
-        
-        if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special1.maxlat && special1.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap()  && client.location.coordinates.longitude.parse::<f64>().unwrap() <= special1.maxlon {
+
+        if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
+            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special1.maxlat
+            && special1.minlon
+                <= client
+                    .location
+                    .coordinates
+                    .longitude
+                    .parse::<f64>()
+                    .unwrap()
+            && client
+                .location
+                .coordinates
+                .longitude
+                .parse::<f64>()
+                .unwrap()
+                <= special1.maxlon
+        {
             client.r#type = String::from("special");
-        }
-        else if special2.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat && special2.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap() && client.location.coordinates.longitude.parse::<f64>().unwrap() <= special2.maxlon {
+        } else if special2.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
+            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat
+            && special2.minlon
+                <= client
+                    .location
+                    .coordinates
+                    .longitude
+                    .parse::<f64>()
+                    .unwrap()
+            && client
+                .location
+                .coordinates
+                .longitude
+                .parse::<f64>()
+                .unwrap()
+                <= special2.maxlon
+        {
             client.r#type = String::from("special");
-        }
-        else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap() && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat && normal.minlon <= client.location.coordinates.longitude.parse::<f64>().unwrap() && client.location.coordinates.longitude.parse::<f64>().unwrap() <= normal.maxlon {
+        } else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
+            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat
+            && normal.minlon
+                <= client
+                    .location
+                    .coordinates
+                    .longitude
+                    .parse::<f64>()
+                    .unwrap()
+            && client
+                .location
+                .coordinates
+                .longitude
+                .parse::<f64>()
+                .unwrap()
+                <= normal.maxlon
+        {
             client.r#type = String::from("normal");
-        }
-        else {
+        } else {
             client.r#type = String::from("labourious");
         }
         // correct phone format.
@@ -318,10 +387,33 @@ fn main() {
         brcode.push_str(client.mobileNumbers[0].clone().as_str());
         client.mobileNumbers[0] = brcode;
 
-
-        println!("{:#?}", &client);
+        // println!("{:#?}", &client);
     }
 
+    json!(json_clients_list)
+}
 
+#[tokio::main]
+async fn main() {
+    use crate::clientslist;
+    use warp::http::Response;
+    use tokio::task::spawn_blocking;
 
+    #[derive(Debug, Serialize, Deserialize, Clone)]
+    struct Replai {json: serde_json::Value}
+
+    impl warp::Reply for Replai {
+    fn into_response(self) -> warp::reply::Response {
+        Response::new(format!("{}", self.json).into())
+    }
+    }
+
+    let route = spawn_blocking(move || {
+        warp::path("clients")
+        .map(|| {
+            let clients = Replai {json: clientslist()};
+            warp::reply::json(&clients)
+    })
+    }).await;
+    warp::serve(route.unwrap()).run(([127, 0, 0, 1], 3030)).await;
 }
