@@ -3,10 +3,10 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter,Error};
+use warp::{Filter,Error, Rejection};
 use tokio::task::spawn_blocking;
 
-async fn clientslist() -> serde_json::Value {
+async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
     
     
@@ -395,28 +395,33 @@ async fn clientslist() -> serde_json::Value {
         // println!("{:#?}", &client);
     }
 
-    json!(json_clients_list)
+    Ok(warp::reply::json(&json_clients_list))
 }
 
 #[tokio::main]
 async fn main() {
     use crate::clientslist;
-    use warp::http::Response;
+    use warp::http::{Method, Response};
     use tokio::task::spawn_blocking;
 
-    #[derive(Debug, Serialize, Deserialize, Clone)]
-    struct Replai {json: serde_json::Value}
+    // #[derive(Debug, Serialize, Deserialize, Clone)]
+    // struct Replai {json: serde_json::Value}
+    //
+    // impl warp::Reply for Replai {
+    // fn into_response(self) -> warp::reply::Response {
+    //     Response::new(format!("{}", self.json).into())
+    // }
+    // }
 
-    impl warp::Reply for Replai {
-    fn into_response(self) -> warp::reply::Response {
-        Response::new(format!("{}", self.json).into())
-    }
-    }
-    let mut clientts = clientslist().await;
-    warp::serve(
-        warp::path("clients")
-        .map(move || {
-            warp::reply::json(&clientts)
-    })
-    ).run(([127, 0, 0, 1], 3030)).await;
+    // let mut clientts: Replai = Replai {json: spawn_blocking( || {clientslist()}).await.unwrap().await};
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_header("content-type")
+        .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
+
+    let clientslist = clientslist().await;
+
+    let route = warp::get().and(warp::path::end()).map(|| {&clientslist}).with(cors);
+
+    warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 }
