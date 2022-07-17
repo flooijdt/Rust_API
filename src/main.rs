@@ -3,7 +3,7 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection};
+use warp::{Filter,Error, Rejection, Reply, http::StatusCode};
 use tokio::task::spawn_blocking;
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -139,14 +139,20 @@ use tokio::task::spawn_blocking;
     pub struct Storage (Vec<Client>);
 
     impl Storage {
-        fn new(             ) -> Self {
+        fn new() -> Self {
             let mut storage = Storage(Vec::new());
         storage
         }
     }
+    // impl warp::Reply for Storage {
+    //     fn into_response(self) -> warp::reply::Response {
+    //         Response::new(format!("{}", self.json).into())
+    //     }
+    // }
+    //
 
 
-fn clients() -> Storage {
+fn clients() -> Result<warp::reply::Json, Rejection> {
     // get Response containing user data from source.
     
     
@@ -408,9 +414,22 @@ fn clients() -> Storage {
   
     // let json_clients_list: Vec<Client> = json_clients_list.into();
     // json_clients_list
-    println!("{:?}", &storage);
-    storage.clone()
+    Ok(warp::reply::json(&storage))
 }
+
+// async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+//     if let Some(_InvalidId) = r.find() {
+//         Ok(warp::reply::with_status(
+//             "No valid ID presented",
+//             StatusCode::UNPROCESSABLE_ENTITY,
+//         ))
+//     } else {
+//         Ok(warp::reply::with_status(
+//             "Route not found",
+//             StatusCode::NOT_FOUND,
+//         ))
+//     }
+// }
 
 #[tokio::main]
 async fn main() {
@@ -441,6 +460,7 @@ async fn main() {
     // let route  = warp::get().and(warp::path::end()).map(|| {&clientslist.into()}).with(cors);
     let mut clients_spawn = spawn_blocking(move || {clients()}).await.unwrap();
 
-    let route = warp::path("clients").map(move || format!{"{:?}", &clients_spawn});
+    // let route = warp::path("clients").map(move || format!{"{:?}", &clients_spawn});
+    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).and_then(clients_spawn);
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 }
