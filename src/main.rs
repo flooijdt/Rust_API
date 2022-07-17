@@ -6,38 +6,14 @@ use std::vec::Vec;
 use warp::{Filter,Error, Rejection};
 use tokio::task::spawn_blocking;
 
-async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
-    // get Response containing user data from source.
-    
-    
-    let response_json: Value = spawn_blocking( move || {
-        reqwest::blocking::get(
-        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
-    )
-    .expect("unable to get the origin json.");
-    }).await.unwrap().into();
-    // convert Response to json.
-    let mut json: Value = response_json;
-    // create list with for Client structs.
-    let mut json_clients_list: Vec<ClientUnited> = Vec::new();
-    // clone json as an array for iteration.
-    let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
-    // iterate json_array in order to fill json_clients_list.
-    for object in json_array.as_array() {
-        for objectling in object {
-            let client = ClientUnited::new(objectling.clone());
-            json_clients_list.push(client);
-        }
-    }
-    // create Client struct and sub-structs for easier data manipulation.
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Dob {
+    pub struct Dob {
         age: u32,
         date: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Location {
+    pub struct Location {
         city: String,
         coordinates: Coordinates,
         postcode: u32,
@@ -47,39 +23,39 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Coordinates {
+    pub struct Coordinates {
         latitude: String,
         longitude: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Timezone {
+    pub struct Timezone {
         description: String,
         offset: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Name {
+    pub struct Name {
         first: String,
         last: String,
         title: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Picture {
+    pub struct Picture {
         large: String,
         medium: String,
         thumbnail: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Registered {
+    pub struct Registered {
         age: u32,
         date: String,
     }
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct ClientUnited {
+    pub struct ClientUnited {
         cell: String,
         dob: Dob,
         email: String,
@@ -98,18 +74,9 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
         }
     }
 
-    // get csv containing user data from source.
-    let mut rdr: Reader<Response> = spawn_blocking( move || {
-        let mut response_csv = reqwest::blocking::get(
-        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv",
-    )
-    .expect("unable to get the origin csv.");
-    // convert response to Reader, for file tempering.
-    let mut rdr = csv::Reader::from_reader(response_csv);
-    rdr
-    }).await.unwrap();
+   // convert response to Reader, for file tempering.
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct ClientCSV {
+    pub struct ClientCSV {
         gender: String,
         name__title: String,
         name__first: String,
@@ -133,6 +100,81 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
         picture__medium: String,
         picture__thumbnail: String,
     }
+     // create final Client struct according to desired output.
+    #[derive(Debug, Deserialize, Clone, Serialize)]
+    pub struct Client {
+        r#type: String,
+        gender: String,
+        name: Name,
+        location: Location2,
+        email: String,
+        birthday: String,
+        registered: String,
+        telephoneNumbers: Vec<String>,
+        mobileNumbers: Vec<String>,
+        picture: Picture,
+        nationality: String,
+    }
+
+    #[derive(Debug, Deserialize, Clone, Serialize)]
+    pub struct Location2 {
+        region: String,
+        city: String,
+        coordinates: Coordinates,
+        postcode: u32,
+        state: String,
+        street: String,
+        timezone: Timezone,
+    }
+    // clasification in regard to coordinates: special, labourious or normal.
+
+    pub struct LocationCorrdinates {
+        minlon: f64,
+        minlat: f64,
+        maxlon: f64,
+        maxlat: f64,
+    }
+
+    #[derive(Debug, Deserialize, Clone, Serialize)]
+    pub struct Storage (Vec<Client>);
+
+    impl Storage {
+        fn new(             ) -> Self {
+            let mut storage = Storage(Vec::new());
+        storage
+        }
+    }
+
+
+fn clients() -> Storage {
+    // get Response containing user data from source.
+    
+    
+    let response_json = reqwest::blocking::get(
+        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
+    ).expect("unable to get the origin json.");
+
+    // convert Response to json.
+    let mut json: Value = serde_json::from_reader(response_json).unwrap();
+    // create list with for Client structs.
+    let mut json_clients_list: Vec<ClientUnited> = Vec::new();
+    // clone json as an array for iteration.
+    let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
+    // iterate json_array in order to fill json_clients_list.
+    for object in json_array.as_array() {
+        for objectling in object {
+            let client = ClientUnited::new(objectling.clone());
+            json_clients_list.push(client);
+        }
+    }
+    // get csv containing user data from source.
+    let mut response_csv = reqwest::blocking::get(
+        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv",
+    )
+    .expect("unable to get the origin csv.");
+    // convert response to Reader, for file tempering.
+    let mut rdr = csv::Reader::from_reader(response_csv);
+
     // convert ClientCSV to Client struct.
     for result in rdr.deserialize() {
         let mut result: ClientCSV = result.unwrap();
@@ -180,40 +222,6 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
     }
 
     // create final Client struct according to desired output.
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Client {
-        r#type: String,
-        gender: String,
-        name: Name,
-        location: Location2,
-        email: String,
-        birthday: String,
-        registered: String,
-        telephoneNumbers: Vec<String>,
-        mobileNumbers: Vec<String>,
-        picture: Picture,
-        nationality: String,
-    }
-
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    struct Location2 {
-        region: String,
-        city: String,
-        coordinates: Coordinates,
-        postcode: u32,
-        state: String,
-        street: String,
-        timezone: Timezone,
-    }
-    // clasification in regard to coordinates: special, labourious or normal.
-
-    struct LocationCorrdinates {
-        minlon: f64,
-        minlat: f64,
-        maxlon: f64,
-        maxlat: f64,
-    }
-
     let special1 = LocationCorrdinates {
         minlon: -2.196998,
         minlat: -46.361899,
@@ -234,6 +242,8 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
         maxlon: -34.016466,
         maxlat: -46.603598,
     };
+
+    let mut storage = Storage::new();
 
     for client in json_clients_list.iter() {
         let client = client.clone();
@@ -392,20 +402,25 @@ async fn clientslist() -> Result<impl warp::Reply, warp::Rejection> {
         brcode.push_str(client.mobileNumbers[0].clone().as_str());
         client.mobileNumbers[0] = brcode;
 
-        // println!("{:#?}", &client);
-    }
+        storage.0.push(client);
 
-    Ok(warp::reply::json(&json_clients_list))
+    }
+  
+    // let json_clients_list: Vec<Client> = json_clients_list.into();
+    // json_clients_list
+    println!("{:?}", &storage);
+    storage.clone()
 }
 
 #[tokio::main]
 async fn main() {
-    use crate::clientslist;
+    use crate::clients;
     use warp::http::{Method, Response};
     use tokio::task::spawn_blocking;
 
+    //
     // #[derive(Debug, Serialize, Deserialize, Clone)]
-    // struct Replai {json: serde_json::Value}
+    // struct Replai {json: Result<String, Error>}
     //
     // impl warp::Reply for Replai {
     // fn into_response(self) -> warp::reply::Response {
@@ -413,15 +428,19 @@ async fn main() {
     // }
     // }
 
+    // let clientslist: Vec<Client> = clientslist().await;
+
+
     // let mut clientts: Replai = Replai {json: spawn_blocking( || {clientslist()}).await.unwrap().await};
-    let cors = warp::cors()
-        .allow_any_origin()
-        .allow_header("content-type")
-        .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
+    // let cors = warp::cors()
+    //     .allow_any_origin()
+    //     .allow_header("content-type")
+    //     .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
-    let clientslist = clientslist().await;
 
-    let route = warp::get().and(warp::path::end()).map(|| {&clientslist}).with(cors);
+    // let route  = warp::get().and(warp::path::end()).map(|| {&clientslist.into()}).with(cors);
+    let mut clients_spawn = spawn_blocking(move || {clients()}).await.unwrap();
 
+    let route = warp::path("clients").map(move || format!{"{:?}", &clients_spawn});
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 }
