@@ -152,7 +152,7 @@ use tokio::task::spawn_blocking;
     //
 
 
-fn clients() -> Result<warp::reply::Json, Rejection> {
+fn get_clients() -> Result<warp::reply::Json, Rejection> {
     // get Response containing user data from source.
     
     
