@@ -262,7 +262,7 @@ fn get_clients() -> Storage {
 
     let mut storage = Storage::new();
 
-    let id_counter = 0;
+    let mut id_counter = 0;
 
     for client in json_clients_list.iter() {        
         let client = client.clone();
@@ -424,9 +424,9 @@ fn get_clients() -> Storage {
 
         client.id = ClientId(id_counter.to_string());
 
-        storage.clients.insert(client.id, client);
+        storage.clients.insert(client.id.clone(), client);
 
-        id_counter = id_counter + 1;
+        id_counter += 1;
     }
   
     // let json_clients_list: Vec<Client> = json_clients_list.into();
