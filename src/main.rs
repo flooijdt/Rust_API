@@ -517,7 +517,7 @@ async fn main() {
 
     // let route = warp::get().and(warp::path!("clients" / usize)).and(warp::path::end()).map(move |id| warp::reply::json(&clients_spawn.0[id])).with(cors).recover(return_error)   ;
 
-    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).map(move || warp::reply::json(&clients_spawn)).with(cors).recover(return_error)   ;
+    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).map(move || warp::reply::json(&clients_spawn.clients[&ClientId(1.to_string())])).with(cors).recover(return_error)   ;
 
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 //FUNCIONANDO
