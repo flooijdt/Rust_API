@@ -104,6 +104,7 @@ use std::collections::HashMap;
      // create final Client struct according to desired output.
     #[derive(Debug, Deserialize, Clone, Serialize)]
     pub struct Client {
+        id: ClientId,
         r#type: String,
         gender: String,
         name: Name,
@@ -129,7 +130,7 @@ use std::collections::HashMap;
     }
     // clasification in regard to coordinates: special, labourious or normal.
 
-    pub struct LocationCorrdinates {
+    pub struct LocationCoordinates {
         minlon: f64,
         minlat: f64,
         maxlon: f64,
@@ -137,12 +138,12 @@ use std::collections::HashMap;
     }
 
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Client_Id (String);
+    #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash)]
+    pub struct ClientId (String);
 
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Storage { clients: HashMap<Client_Id, Client>, }
+    pub struct Storage { clients: HashMap<ClientId, Client>, }
 
     impl Storage {
         fn new() -> Self {
@@ -238,21 +239,21 @@ fn get_clients() -> Storage {
     }
 
     // create final Client struct according to desired output.
-    let special1 = LocationCorrdinates {
+    let special1 = LocationCoordinates {
         minlon: -2.196998,
         minlat: -46.361899,
         maxlon: -15.411580,
         maxlat: -34.276938,
     };
 
-    let special2 = LocationCorrdinates {
+    let special2 = LocationCoordinates {
         minlon: -19.766959,
         minlat: -52.997614,
         maxlon: -23.966413,
         maxlat: -44.428305,
     };
 
-    let normal = LocationCorrdinates {
+    let normal = LocationCoordinates {
         minlon: -26.155681,
         minlat: -54.777426,
         maxlon: -34.016466,
@@ -261,9 +262,12 @@ fn get_clients() -> Storage {
 
     let mut storage = Storage::new();
 
-    for client in json_clients_list.iter() {
+    let id_counter = 0;
+
+    for client in json_clients_list.iter() {        
         let client = client.clone();
         let mut client: Client = Client {
+            id: ClientId(String::from("placeholder")),
             r#type: String::from("placeholder"),
             gender: client.gender,
             name: Name {
@@ -418,8 +422,11 @@ fn get_clients() -> Storage {
         brcode.push_str(client.mobileNumbers[0].clone().as_str());
         client.mobileNumbers[0] = brcode;
 
-        storage.0.push(client);
+        client.id = ClientId(id_counter.to_string());
 
+        storage.clients.insert(client.id, client);
+
+        id_counter = id_counter + 1;
     }
   
     // let json_clients_list: Vec<Client> = json_clients_list.into();
@@ -510,7 +517,7 @@ async fn main() {
 
     // let route = warp::get().and(warp::path!("clients" / usize)).and(warp::path::end()).map(move |id| warp::reply::json(&clients_spawn.0[id])).with(cors).recover(return_error)   ;
 
-    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).and(warp::query()).map(move || warp::reply::json(&clients_spawn)).with(cors).recover(return_error)   ;
+    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).map(move || warp::reply::json(&clients_spawn)).with(cors).recover(return_error)   ;
 
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 //FUNCIONANDO
