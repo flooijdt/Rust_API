@@ -3,8 +3,9 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode};
+use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}};
 use tokio::task::spawn_blocking;
+use std::collections::HashMap;
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
     pub struct Dob {
@@ -135,14 +136,23 @@ use tokio::task::spawn_blocking;
         maxlat: f64,
     }
 
+
     #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Storage (Vec<Client>);
+    pub struct Client_Id (String);
+
+
+    #[derive(Debug, Deserialize, Clone, Serialize)]
+    pub struct Storage { clients: HashMap<Client_Id, Client>, }
 
     impl Storage {
         fn new() -> Self {
-            let mut storage = Storage(Vec::new());
-        storage
+            Storage{ clients: HashMap::new(), }
         }
+        
+        fn add_client(mut self, client: Client) -> Self {
+        self.clients.insert(client.id.clone(), client);
+        self
+    }
     }
     // impl warp::Reply for Storage {
     //     fn into_response(self) -> warp::reply::Response {
@@ -152,7 +162,7 @@ use tokio::task::spawn_blocking;
     //
 
 
-fn get_clients() -> Result<warp::reply::Json, Rejection> {
+fn get_clients() -> Storage {
     // get Response containing user data from source.
     
     
@@ -414,7 +424,8 @@ fn get_clients() -> Result<warp::reply::Json, Rejection> {
   
     // let json_clients_list: Vec<Client> = json_clients_list.into();
     // json_clients_list
-    Ok(warp::reply::json(&storage))
+    storage
+    // Ok::<warp::reply::Json, warp::Rejection>(warp::reply::json(&storage))
 }
 
 // async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
@@ -433,8 +444,7 @@ fn get_clients() -> Result<warp::reply::Json, Rejection> {
 
 #[tokio::main]
 async fn main() {
-    use crate::clients;
-    use warp::http::{Method, Response};
+    use warp::http::{Method};
     use tokio::task::spawn_blocking;
 
     //
@@ -451,16 +461,57 @@ async fn main() {
 
 
     // let mut clientts: Replai = Replai {json: spawn_blocking( || {clientslist()}).await.unwrap().await};
-    // let cors = warp::cors()
-    //     .allow_any_origin()
-    //     .allow_header("content-type")
-    //     .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_header("content-type")
+        .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
+
+    // let mut clients_spawn = spawn_blocking(move || {get_clients()}).await.unwrap();
+    //
+    // let route = warp::get().and(warp::path("clients")).and(warp::path::end()).and_then(match get_clients() {
+    //        Err(_) =>  {
+    //            Err(warp::reject::reject())
+    //        },
+    //        Ok(storage) => {
+    //            Ok(warp::reply::json(
+    //                &get_clients().unwrap()
+    //            ))
+    //        }
+    //   }
+    // );
+    // warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
+
+//FUNCIONANDO
+    #[derive(Debug)]
+    struct InvalidId;
+    impl Reject for InvalidId {}
+
+    async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+        if let Some(error) = r.find::<CorsForbidden>() {
+            Ok(warp::reply::with_status(
+                error.to_string(),
+                StatusCode::FORBIDDEN,
+            ))
+        } else if let Some(InvalidId) = r.find() {
+            Ok(warp::reply::with_status(
+                "No valid ID presented".to_string(),
+                StatusCode::UNPROCESSABLE_ENTITY,
+            ))
+        }  else {
+            Ok(warp::reply::with_status(
+                "Route not found".to_string(),
+                StatusCode::NOT_FOUND,
+            ))
+        }
+    }
+
+    let mut clients_spawn = spawn_blocking(move || {get_clients()}).await.unwrap().clone();
 
 
-    // let route  = warp::get().and(warp::path::end()).map(|| {&clientslist.into()}).with(cors);
-    let mut clients_spawn = spawn_blocking(move || {clients()}).await.unwrap();
+    // let route = warp::get().and(warp::path!("clients" / usize)).and(warp::path::end()).map(move |id| warp::reply::json(&clients_spawn.0[id])).with(cors).recover(return_error)   ;
 
-    // let route = warp::path("clients").map(move || format!{"{:?}", &clients_spawn});
-    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).and_then(clients_spawn);
+    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).and(warp::query()).map(move || warp::reply::json(&clients_spawn)).with(cors).recover(return_error)   ;
+
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
+//FUNCIONANDO
 }

@@ -14,3 +14,4 @@ tuple = "*"
 json = "*"
 tokio = {version = "*", features = ["full"]}
 warp = "*"
+futures = "*"
