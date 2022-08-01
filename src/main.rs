@@ -105,13 +105,12 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         maxlat: -46.603598,
     };
 
-
     let mut id_counter = 0;
 
     for client in json_clients_list.iter() {        
         let client = client.clone();
         let mut client: structs::Client = structs::Client {
-            id: ClientId(String::from("placeholder")),
+            id: structs::ClientId(String::from("placeholder")),
             r#type: String::from("placeholder"),
             gender: client.gender,
             name: structs::Name {
@@ -278,7 +277,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     println!("{:#?}", params);
     Ok(warp::reply::json(&res))
 }
-
 
 #[tokio::main]
 async fn main() {
