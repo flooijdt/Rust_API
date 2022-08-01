@@ -3,7 +3,7 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}};
+use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}, query};
 use tokio::task::spawn_blocking;
 use std::collections::HashMap;
 
@@ -163,7 +163,7 @@ use std::collections::HashMap;
     //
 
 
-fn get_clients() -> Storage {
+async fn get_clients(params: HashMap<String, String>) -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
     
     
@@ -431,8 +431,12 @@ fn get_clients() -> Storage {
   
     // let json_clients_list: Vec<Client> = json_clients_list.into();
     // json_clients_list
-    storage
-    // Ok::<warp::reply::Json, warp::Rejection>(warp::reply::json(&storage))
+    // storage
+
+    let res: Vec<Client> = storage.clients.values().cloned().collect();
+
+    println!("{:#?}", params);
+    Ok(warp::reply::json(&res))
 }
 
 // async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
@@ -512,13 +516,25 @@ async fn main() {
         }
     }
 
-    let mut clients_spawn = spawn_blocking(move || {get_clients()}).await.unwrap().clone();
+    // let mut clients_spawn = spawn_blocking(move || {get_clients()}).await.unwrap().clone();
 
 
     // let route = warp::get().and(warp::path!("clients" / usize)).and(warp::path::end()).map(move |id| warp::reply::json(&clients_spawn.0[id])).with(cors).recover(return_error)   ;
 
-    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).map(move || warp::reply::json(&clients_spawn.clients[&ClientId(1.to_string())])).with(cors).recover(return_error)   ;
+    let storage = Storage::new();
 
-    warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
+    let storage_filter = warp::any().map(move || storage.clone());
+
+    let get_clients = warp::get()
+        .and(warp::path("clients"))
+        .and(warp::path::end())
+        .and(query())
+        .and(storage_filter)
+        .and_then(get_clients)
+        .recover(return_error);
+
+    let routes = get_clients.with(cors);
+
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 //FUNCIONANDO
 }
