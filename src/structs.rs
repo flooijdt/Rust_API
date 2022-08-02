@@ -96,6 +96,16 @@ use serde_json::Value;
         pub picture__medium: String,
         pub picture__thumbnail: String,
     }
+
+    impl ClientCSV {
+        pub fn new(value: Value) -> Self {
+            let client: ClientCSV = serde_json::from_value(value).unwrap();
+            client
+        }
+    }
+
+
+
      // create final Client struct according to desired output.
     #[derive(Debug, Deserialize, Clone, Serialize)]
     pub struct Client {

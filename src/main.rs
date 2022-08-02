@@ -6,18 +6,39 @@ use std::vec::Vec;
 use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}, query};
 use tokio::task::spawn_blocking;
 use std::collections::HashMap;
+use reqwest::blocking::Client;
 pub mod structs;
 
 async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
     
+
+    let client = Client::new();
+    let resp = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
+    println!("{:?}", resp);
+
+    let resp2 = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap();
+
+
+
+
+
+
+
+
+
+
+
+
+
     
-    let response_json = reqwest::blocking::get(
-        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
-    ).expect("unable to get the origin json.");
+    let json: Value = resp.into();
+
+
+
 
     // convert Response to json.
-    let mut json: Value = serde_json::from_reader(response_json).unwrap();
+    // let mut json: Value = serde_json::from_reader(response_json).unwrap();
     // create list with for Client structs.
     let mut json_clients_list: Vec<structs::ClientUnited> = Vec::new();
     // clone json as an array for iteration.
@@ -30,16 +51,14 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         }
     }
     // get csv containing user data from source.
-    let mut response_csv = reqwest::blocking::get(
-        "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv",
-    )
-    .expect("unable to get the origin csv.");
+    let mut rdr: Value = resp2.into();
     // convert response to Reader, for file tempering.
-    let mut rdr = csv::Reader::from_reader(response_csv);
+    // let mut rdr  = csv::Reader::from_reader(response_csv);
 
     // convert ClientCSV to Client struct.
-    for result in rdr.deserialize() {
-        let mut result: structs::ClientCSV = result.unwrap();
+    for result in rdr.as_array_mut() {
+        for result in result {
+        let mut result = structs::ClientCSV::new(result.clone());
         result = result.clone();
         let mut result: structs::ClientUnited = structs::ClientUnited {
             cell: result.cell,
@@ -81,7 +100,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         };
         // println!("{:#?}", &result);
         json_clients_list.push(result);
-    }
+    }}
 
     // create final Client struct according to desired output.
     let special1 = structs::LocationCoordinates {
@@ -274,6 +293,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
     let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
 
+    println!("{:?}", &res);
     println!("{:#?}", params);
     Ok(warp::reply::json(&res))
 }
@@ -314,6 +334,14 @@ async fn main() {
     let mut storage = structs::Storage::new();
 
     let storage_filter = warp::any().map(move || storage.clone());
+
+
+    let stringa = String::from("aaa");
+    let stringb = String::from("bbb");
+
+    let params: HashMap<String, String> = HashMap::new();
+
+    println!("{:?}", get_clients( storage));
 
     let get_clients = warp::get()
         .and(warp::path("clients"))
