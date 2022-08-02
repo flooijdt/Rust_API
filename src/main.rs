@@ -9,15 +9,16 @@ use std::collections::HashMap;
 use reqwest::blocking::Client;
 pub mod structs;
 
-fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
+async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
     
 
     let client = Client::new();
-    let resp = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
+    let resp: String = spawn_blocking(move ||client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()).await.unwrap().clone();  
     println!("{:?}", resp);
 
-    let resp2 = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap();
+    let client = Client::new();
+    let resp2: String = spawn_blocking(move ||client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()).await.unwrap().clone();
 
 
 
@@ -344,21 +345,21 @@ async fn main() {
     // let thing: dyn warp::Reply = get_clients(params, storage).await.unwrap().into();
     // println!("{:?}", get_clients(params, storage).await.unwrap().into());
 
+    let get_clients = spawn_blocking(|| warp::get()
+        .and(warp::path("clients"))
+        .and(warp::path::end())
+        .and(query())
+        .and(storage_filter)
+        .and_then(get_clients)
+        .recover(return_error)).await.unwrap();
+
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
     //     .and(warp::path::end())
     //     .and(query())
     //     .and(storage_filter)
-    //     .and_then(get_clients)
+    //     .map(|a, b| async get_clients(a, b).await.unwrap())
     //     .recover(return_error);
-    //
-    let get_clients = warp::get()
-        .and(warp::path("clients"))
-        .and(warp::path::end())
-        .and(query())
-        .and(storage_filter)
-        .map(|a, b| get_clients(a, b))
-        .recover(return_error);
 
 
 
