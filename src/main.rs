@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use reqwest::blocking::Client;
 pub mod structs;
 
-async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
+fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
     
 
@@ -341,15 +341,29 @@ async fn main() {
 
     let params: HashMap<String, String> = HashMap::new();
 
-    println!("{:?}", get_clients( storage));
+    // let thing: dyn warp::Reply = get_clients(params, storage).await.unwrap().into();
+    // println!("{:?}", get_clients(params, storage).await.unwrap().into());
 
+    // let get_clients = warp::get()
+    //     .and(warp::path("clients"))
+    //     .and(warp::path::end())
+    //     .and(query())
+    //     .and(storage_filter)
+    //     .and_then(get_clients)
+    //     .recover(return_error);
+    //
     let get_clients = warp::get()
         .and(warp::path("clients"))
         .and(warp::path::end())
         .and(query())
         .and(storage_filter)
-        .and_then(get_clients)
+        .map(|a, b| get_clients(a, b))
         .recover(return_error);
+
+
+
+
+
 
     let routes = get_clients.with(cors);
 
