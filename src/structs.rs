@@ -1,6 +1,8 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use serde_json::Value;
+use tokio::sync::RwLock;
+use std::sync::Arc;
 
     #[derive(Debug, Deserialize, Clone, Serialize)]
     pub struct Dob {
@@ -147,19 +149,21 @@ use serde_json::Value;
     pub struct ClientId (pub String);
 
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Storage { pub clients: HashMap<ClientId, Client>, }
+    #[derive(Debug, Clone)]
+    pub struct Storage { pub clients: Arc<RwLock<HashMap<ClientId, Client>>>}
 
     impl Storage {
         pub fn new() -> Self {
-            Storage{ clients: HashMap::new(), }
+            Storage{ clients: Arc::new(RwLock::new(HashMap::new()))}
         }
-        
-        pub fn add_client(mut self, client: Client) -> Self {
-        self.clients.insert(client.id.clone(), client);
-        self
+        // pub fn init() -> HashMap<ClientId, Client> {
+        // let map: HashMap<ClientId, Client> = HashMap::new();
+        // map
     }
-    }
+    //     pub fn add_client(mut self, client: Client) -> Self {
+    //     self.clients.write().insert(client.id.clone(), client);
+    //     self
+    // }
     // impl warp::Reply for Storage {
     //     fn into_response(self) -> warp::reply::Response {
     //         Response::new(format!("{}", self.json).into())

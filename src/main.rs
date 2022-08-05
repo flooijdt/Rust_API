@@ -4,7 +4,8 @@ use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
 use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}, query};
-use tokio::task::spawn_blocking;
+use tokio::sync::RwLock;
+use std::sync::Arc;
 use std::collections::HashMap;
 use reqwest::blocking::Client;
 pub mod structs;
@@ -14,11 +15,11 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     
 
     let client = Client::new();
-    let resp: String = spawn_blocking(move ||client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()).await.unwrap().clone();  
+    let resp: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
     println!("{:?}", resp);
 
     let client = Client::new();
-    let resp2: String = spawn_blocking(move ||client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()).await.unwrap().clone();
+    let resp2: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap();
 
 
 
@@ -287,12 +288,12 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
         client.id = structs::ClientId(id_counter.to_string());
 
-        storage.clients.insert(client.id.clone(), client);
+        storage.clients.write().await.insert(client.id.clone(), client);
 
         id_counter += 1;
     }
 
-    let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
+    let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
 
     println!("{:?}", &res);
     println!("{:#?}", params);
@@ -345,13 +346,13 @@ async fn main() {
     // let thing: dyn warp::Reply = get_clients(params, storage).await.unwrap().into();
     // println!("{:?}", get_clients(params, storage).await.unwrap().into());
 
-    let get_clients = spawn_blocking(|| warp::get()
+    let get_clients = warp::get()
         .and(warp::path("clients"))
         .and(warp::path::end())
         .and(query())
         .and(storage_filter)
         .and_then(get_clients)
-        .recover(return_error)).await.unwrap();
+        .recover(return_error);
 
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
