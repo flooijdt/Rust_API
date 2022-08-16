@@ -3,8 +3,8 @@ use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}, query};
-use tokio::sync::RwLock;
+use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{cors::CorsForbidden}, query};
+use tokio::{sync::RwLock, task};
 use std::sync::Arc;
 use std::collections::HashMap;
 use reqwest::blocking::Client;
@@ -12,32 +12,23 @@ pub mod structs;
 
 async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
     // get Response containing user data from source.
-    
+    let resp: String = task::spawn_blocking(|| {
+    // do some compute-heavy work or call synchronous code
 
-    let client = Client::new();
-    let resp: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
+        let client = Client::new();
+        client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()
+    }).await.unwrap();
+
     println!("{:?}", resp);
-
-    let client = Client::new();
-    let resp2: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap();
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    // let client = Client::new();
+    // let resp: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
+    // println!("{:?}", resp);
+    //
+    let resp2: String = task::spawn_blocking(|| { 
+        let client = Client::new();
+        client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
+    }).await.unwrap();
     let json: Value = resp.into();
-
-
-
 
     // convert Response to json.
     // let mut json: Value = serde_json::from_reader(response_json).unwrap();
@@ -45,6 +36,9 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     let mut json_clients_list: Vec<structs::ClientUnited> = Vec::new();
     // clone json as an array for iteration.
     let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
+
+    println!("{:?}", &json_array);
+
     // iterate json_array in order to fill json_clients_list.
     for object in json_array.as_array() {
         for objectling in object {
@@ -53,54 +47,54 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         }
     }
     // get csv containing user data from source.
-    let mut rdr: Value = resp2.into();
+    let mut json2: Value = resp2.into();
     // convert response to Reader, for file tempering.
-    // let mut rdr  = csv::Reader::from_reader(response_csv);
+    // let mut json2  = csv::Reader::from_reader(response_csv);
 
     // convert ClientCSV to Client struct.
-    for result in rdr.as_array_mut() {
+    for result in json2.as_array_mut() {
         for result in result {
-        let mut result = structs::ClientCSV::new(result.clone());
-        result = result.clone();
-        let mut result: structs::ClientUnited = structs::ClientUnited {
-            cell: result.cell,
-            dob: structs::Dob {
-                age: result.dob__age,
-                date: result.dob__date,
-            },
-            email: result.email,
-            gender: result.gender,
-            location: structs::Location {
-                city: result.location__city,
-                coordinates: structs::Coordinates {
-                    latitude: result.location__coordinates__latitude.to_string(),
-                    longitude: result.location__coordinates__longitude.to_string(),
+            let mut result = structs::ClientCSV::new(result.clone());
+            result = result.clone();
+            let mut result: structs::ClientUnited = structs::ClientUnited {
+                cell: result.cell,
+                dob: structs::Dob {
+                    age: result.dob__age,
+                    date: result.dob__date,
                 },
-                postcode: result.location__postcode,
-                state: result.location__state,
-                street: result.location__street,
-                timezone: structs::Timezone {
-                    description: result.location__timezone__description,
-                    offset: result.location__timezone__offset,
+                email: result.email,
+                gender: result.gender,
+                location: structs::Location {
+                    city: result.location__city,
+                    coordinates: structs::Coordinates {
+                        latitude: result.location__coordinates__latitude.to_string(),
+                        longitude: result.location__coordinates__longitude.to_string(),
+                    },
+                    postcode: result.location__postcode,
+                    state: result.location__state,
+                    street: result.location__street,
+                    timezone: structs::Timezone {
+                        description: result.location__timezone__description,
+                        offset: result.location__timezone__offset,
+                    },
                 },
-            },
-            name: structs::Name {
-                first: result.name__first,
-                last: result.name__last,
-                title: result.name__title,
-            },
-            phone: result.phone,
-            picture: structs::Picture {
-                large: result.picture__large,
-                medium: result.picture__medium,
-                thumbnail: result.picture__thumbnail,
-            },
-            registered: structs::Registered {
-                age: result.registered__age,
-                date: result.registered__date,
-            },
-        };
-        // println!("{:#?}", &result);
+                name: structs::Name {
+                    first: result.name__first,
+                    last: result.name__last,
+                    title: result.name__title,
+                },
+                phone: result.phone,
+                picture: structs::Picture {
+                    large: result.picture__large,
+                    medium: result.picture__medium,
+                    thumbnail: result.picture__thumbnail,
+                },
+                registered: structs::Registered {
+                    age: result.registered__age,
+                    date: result.registered__date,
+                },
+            };
+            // println!("{:#?}", &result);
         json_clients_list.push(result);
     }}
 
@@ -302,9 +296,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
 #[tokio::main]
 async fn main() {
-    use warp::http::{Method};
-    use tokio::task::spawn_blocking;
-
     let cors = warp::cors()
         .allow_any_origin()
         .allow_header("content-type")
@@ -345,6 +336,8 @@ async fn main() {
 
     // let thing: dyn warp::Reply = get_clients(params, storage).await.unwrap().into();
     // println!("{:?}", get_clients(params, storage).await.unwrap().into());
+    let mut stoolrage = structs::Storage::new();
+    get_clients(params, stoolrage);
 
     let get_clients = warp::get()
         .and(warp::path("clients"))
