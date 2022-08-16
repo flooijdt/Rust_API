@@ -329,15 +329,15 @@ async fn main() {
     let storage_filter = warp::any().map(move || storage.clone());
 
 
-    let stringa = String::from("aaa");
-    let stringb = String::from("bbb");
+    // let stringa = String::from("aaa");
+    // let stringb = String::from("bbb");
 
-    let params: HashMap<String, String> = HashMap::new();
+    // let params: HashMap<String, String> = HashMap::new();
 
     // let thing: dyn warp::Reply = get_clients(params, storage).await.unwrap().into();
     // println!("{:?}", get_clients(params, storage).await.unwrap().into());
-    let mut stoolrage = structs::Storage::new();
-    get_clients(params, stoolrage);
+    // let mut stoolrage = structs::Storage::new();
+    // get_clients(params, stoolrage);
 
     let get_clients = warp::get()
         .and(warp::path("clients"))
