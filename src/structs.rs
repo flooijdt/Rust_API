@@ -171,5 +171,9 @@ use std::sync::Arc;
     // }
     //
 
-
+    #[derive(Debug, Clone)]
+    pub struct Pagination {
+        pub start: usize,
+        pub end: usize,
+    }
 

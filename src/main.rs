@@ -19,7 +19,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()
     }).await.unwrap();
 
-    println!("{:?}", resp);
+    // println!("{:?}", resp);
     // let client = Client::new();
     // let resp: String = client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap();  
     // println!("{:?}", resp);
@@ -37,7 +37,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // clone json as an array for iteration.
     let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
 
-    println!("{:?}", &json_array);
+    // println!("{:?}", &json_array);
 
     // iterate json_array in order to fill json_clients_list.
     for object in json_array.as_array() {
@@ -286,21 +286,54 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
         id_counter += 1;
     }
-
+    // fn extract_pagination(params: HashMap<String, String>) -> Result<structs::Pagination, Error> {
+    //     if params.contains_key("start") && params.contains_key("end") {
+    //         return Ok(structs::Pagination { 
+    //             start: params
+    //                 .get("start")
+    //                 .unwrap()
+    //                 .parse::<usize>()
+    //                 .unwrap(),
+    //             end: params
+    //                 .get("end")
+    //                 .unwrap()
+    //                 .parse::<usize>()
+    //                 .unwrap(),
+    //         });
+    //     }
+    //  
+    // Err(_)
+    // }
+    //
+    //
+    // if !params.is_empty() {
+    //     let pagination = extract_pagination(params)?;
+    //     let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
+    //     let res = &res[pagination.start..pagination.end];
+    //     Ok(warp::reply::json(&res))
+    // } else {
+    //     let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
+    //     Ok(warp::reply::json(&res))
+    // }
+    //
+    let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
+    println!("{:#?}", &storage.clients.read().await.get(&exclientid));
     let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
 
-    println!("{:?}", &res);
+    // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
+    println!("{:#?}", &res);
     println!("{:#?}", params);
     Ok(warp::reply::json(&res))
 }
 
 #[tokio::main]
 async fn main() {
+/* Creates cors filter */
     let cors = warp::cors()
         .allow_any_origin()
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
-
+/* Deals with errors (Rejections) */
     #[derive(Debug)]
     struct InvalidId;
     impl Reject for InvalidId {}
@@ -354,8 +387,25 @@ async fn main() {
     //     .and(storage_filter)
     //     .map(|a, b| async get_clients(a, b).await.unwrap())
     //     .recover(return_error);
-
-
+    // fn extract_pagination(params: HashMap<String, String>) -> Result<structs::Pagination, Error> {
+    //     if params.contains_key("start") && params.contains_key("end") {
+    //         return Ok(structs::Pagination { 
+    //             start: params
+    //                 .get("start")
+    //                 .unwrap()
+    //                 .parse::<usize>()
+    //                 .map_err(Error::ParseError)?,
+    //             end: params
+    //                 .get("end")
+    //                 .unwrap()
+    //                 .parse::<usize>()
+    //                 .map_err(Error::ParseError)?,
+    //         });
+    //     }
+    //  
+    // Err(Error::MissingParameters)
+    // }
+    //
 
 
 
