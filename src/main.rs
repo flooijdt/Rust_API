@@ -10,7 +10,11 @@ use std::collections::HashMap;
 use reqwest::blocking::Client;
 pub mod structs;
 
-async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<impl warp::Reply, warp::Rejection> {
+async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::Storage)*/ -> Vec<structs::Client> {
+
+
+    let mut storage = structs::Storage::new();
+
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
     // do some compute-heavy work or call synchronous code
@@ -37,7 +41,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // clone json as an array for iteration.
     let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
 
-    // println!("{:?}", &json_array);
+    // println!("{:?}", &json);
 
     // iterate json_array in order to fill json_clients_list.
     for object in json_array.as_array() {
@@ -51,9 +55,11 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // convert response to Reader, for file tempering.
     // let mut json2  = csv::Reader::from_reader(response_csv);
 
+    // println!("{:?}", &json2); -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
     for result in json2.as_array_mut() {
         for result in result {
+            println!("{:?}", &result);
             let mut result = structs::ClientCSV::new(result.clone());
             result = result.clone();
             let mut result: structs::ClientUnited = structs::ClientUnited {
@@ -98,6 +104,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         json_clients_list.push(result);
     }}
 
+    // println!("{:?}", &json_clients_list);
     // create final Client struct according to desired output.
     let special1 = structs::LocationCoordinates {
         minlon: -2.196998,
@@ -282,6 +289,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
         client.id = structs::ClientId(id_counter.to_string());
 
+        println!("{:#?}", &client);
         storage.clients.write().await.insert(client.id.clone(), client);
 
         id_counter += 1;
@@ -316,14 +324,16 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     //     Ok(warp::reply::json(&res))
     // }
     //
+
     let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
     println!("{:#?}", &storage.clients.read().await.get(&exclientid));
     let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
 
     // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
     println!("{:#?}", &res);
-    println!("{:#?}", params);
-    Ok(warp::reply::json(&res))
+    // println!("{:#?}", params);
+    // Ok(warp::reply::json(&res))
+    res
 }
 
 #[tokio::main]
@@ -362,6 +372,8 @@ async fn main() {
     let storage_filter = warp::any().map(move || storage.clone());
 
 
+    let storagee = get_clients().await; 
+    println!("{:?}", storagee);
     // let stringa = String::from("aaa");
     // let stringb = String::from("bbb");
 
@@ -372,14 +384,14 @@ async fn main() {
     // let mut stoolrage = structs::Storage::new();
     // get_clients(params, stoolrage);
 
-    let get_clients = warp::get()
-        .and(warp::path("clients"))
-        .and(warp::path::end())
-        .and(query())
-        .and(storage_filter)
-        .and_then(get_clients)
-        .recover(return_error);
-
+    // let get_clients = warp::get()
+    //     .and(warp::path("clients"))
+    //     .and(warp::path::end())
+    //     .and(query())
+    //     .and(storage_filter)
+    //     .and_then(get_clients)
+    //     .recover(return_error);
+    //
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
     //     .and(warp::path::end())
@@ -410,7 +422,7 @@ async fn main() {
 
 
 
-    let routes = get_clients.with(cors);
+    // let routes = get_clients.with(cors);
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    // warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
