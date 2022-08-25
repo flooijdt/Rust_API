@@ -55,11 +55,12 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
     // convert response to Reader, for file tempering.
     // let mut json2  = csv::Reader::from_reader(response_csv);
 
-    // println!("{:?}", &json2); -----------------------------------------------até aqui (json2) print os customers.
+    // println!("{:?}", &json2);// -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
-    for result in json2.as_array_mut() {
+    for result in json2.as_array_mut(){
+        println!("{:?}", &result);
         for result in result {
-            println!("{:?}", &result);
+            // println!("{:?}", &result);
             let mut result = structs::ClientCSV::new(result.clone());
             result = result.clone();
             let mut result: structs::ClientUnited = structs::ClientUnited {
