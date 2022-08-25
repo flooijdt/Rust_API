@@ -32,33 +32,39 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
         let client = Client::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
-    let json: Value = resp.into();
+    let mut json: Value = resp.into();
 
     // convert Response to json.
     // let mut json: Value = serde_json::from_reader(response_json).unwrap();
     // create list with for Client structs.
     let mut json_clients_list: Vec<structs::ClientUnited> = Vec::new();
     // clone json as an array for iteration.
-    let json_array: Value = serde_json::from_value(json["results"].clone()).unwrap();
+    // let mut json_array = json.clone();
 
-    // println!("{:?}", &json);
+    // println!("{:?}", &json_array);//-----------------------------------------does not print
 
+    // println!("{:?}", &json);//---------------------------- still prints!
     // iterate json_array in order to fill json_clients_list.
-    for object in json_array.as_array() {
-        for objectling in object {
-            let client = structs::ClientUnited::new(objectling.clone());
-            json_clients_list.push(client);
-        }
+    for object in json.as_array_mut().unwrap() {
+        println!("{:?}", &object);
+        // for objectling in object {
+        //     println!("antes objectling");
+        //     println!("{:?}", &objectling);
+        //     println!("depois objectling");
+        //     let client = structs::ClientUnited::new(objectling.clone());
+        //     json_clients_list.push(client);
+        // }
     }
+    // println!("{:?}", &json_clients_list);
     // get csv containing user data from source.
-    let mut json2: Value = resp2.into();
+    let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
     // convert response to Reader, for file tempering.
     // let mut json2  = csv::Reader::from_reader(response_csv);
 
     // println!("{:?}", &json2);// -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
     for result in json2.as_array_mut(){
-        println!("{:?}", &result);
+        // println!("{:?}", &result);
         for result in result {
             // println!("{:?}", &result);
             let mut result = structs::ClientCSV::new(result.clone());
@@ -290,7 +296,7 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
 
         client.id = structs::ClientId(id_counter.to_string());
 
-        println!("{:#?}", &client);
+        // println!("{:#?}", &client);
         storage.clients.write().await.insert(client.id.clone(), client);
 
         id_counter += 1;
@@ -327,11 +333,11 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
     //
 
     let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
-    println!("{:#?}", &storage.clients.read().await.get(&exclientid));
+    // println!("{:#?}", &storage.clients.read().await.get(&exclientid));
     let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
 
     // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
-    println!("{:#?}", &res);
+    // println!("{:#?}", &res);
     // println!("{:#?}", params);
     // Ok(warp::reply::json(&res))
     res
