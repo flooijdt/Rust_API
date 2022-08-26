@@ -13,7 +13,7 @@ pub mod structs;
 async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<warp::reply::Json, Rejection>{
 
 
-    let mut storage = structs::Storage::new();
+    // let mut storage = structs::Storage::new();
 
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
@@ -44,7 +44,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
     // println!("{:?}", &json_array);//-----------------------------------------does not print
 
-    let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
+    // let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
     // println!("{:?}", &json["results"]);//---------------------------- still prints!
     // iterate json_array in order to fill json_clients_list.
     // let mut json_array = json.as_object_mut();
@@ -65,14 +65,19 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // convert response to Reader, for file tempering.
     // let mut json2  = csv::Reader::from_reader(response_csv);
 
+    let mut json2  = csv::Reader::from_reader(resp2.as_bytes());
     // println!("{:?}", &json2);// -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
-    for result in json2.as_array_mut(){
+    for result in json2.deserialize::<Vec<structs::ClientCSV>>() {
         // println!("{:?}", &result);
-        for result in result {
-            // println!("{:?}", &result);
-            let mut result = structs::ClientCSV::new(result.clone());
-            result = result.clone();
+    // 
+        for result in result.unwrap() {
+    //         // println!("{:?}", &result);
+            // println!("{:?}", &result);    
+            // let mut result = structs::ClientCSV::new(result);
+            // println!("{:?}", &result);   
+    
+            // result = result.clone();
             let mut result: structs::ClientUnited = structs::ClientUnited {
                 cell: result.cell,
                 dob: structs::Dob {
@@ -114,7 +119,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
             // println!("{:#?}", &result);
         json_clients_list.push(result);
     }}
-
     // println!("{:?}", &json_clients_list);
     // create final Client struct according to desired output.
     let special1 = structs::LocationCoordinates {
