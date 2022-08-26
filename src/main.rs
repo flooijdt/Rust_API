@@ -32,7 +32,7 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
         let client = Client::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
-    let mut json: Value = resp.into();
+    let mut json = json!(resp);
 
     // convert Response to json.
     // let mut json: Value = serde_json::from_reader(response_json).unwrap();
@@ -43,21 +43,24 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
 
     // println!("{:?}", &json_array);//-----------------------------------------does not print
 
+    let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
     // println!("{:?}", &json);//---------------------------- still prints!
     // iterate json_array in order to fill json_clients_list.
-    for object in json.as_array_mut().unwrap() {
+    // let mut json_array = json.as_object_mut();
+
+    for object in json["results"].as_object().iter()  {
         println!("{:?}", &object);
-        // for objectling in object {
-        //     println!("antes objectling");
-        //     println!("{:?}", &objectling);
-        //     println!("depois objectling");
+        for objectling in object.iter() {
+            println!("antes objectling");
+            println!("{:?}", &objectling);
+            println!("depois objectling");
         //     let client = structs::ClientUnited::new(objectling.clone());
         //     json_clients_list.push(client);
-        // }
+        }
     }
     // println!("{:?}", &json_clients_list);
     // get csv containing user data from source.
-    let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
+    // let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
     // convert response to Reader, for file tempering.
     // let mut json2  = csv::Reader::from_reader(response_csv);
 
