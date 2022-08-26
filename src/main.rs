@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use reqwest::blocking::Client;
 pub mod structs;
 
-async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::Storage)*/ -> Vec<structs::Client> {
+async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<warp::reply::Json, Rejection>{
 
 
     let mut storage = structs::Storage::new();
@@ -32,10 +32,11 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
         let client = Client::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
-    let mut json = json!(resp);
+    // let mut json = res.f;
+    
 
     // convert Response to json.
-    // let mut json: Value = serde_json::from_reader(response_json).unwrap();
+    let mut json: Value = serde_json::from_str(resp.as_str()).unwrap();
     // create list with for Client structs.
     let mut json_clients_list: Vec<structs::ClientUnited> = Vec::new();
     // clone json as an array for iteration.
@@ -44,18 +45,18 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
     // println!("{:?}", &json_array);//-----------------------------------------does not print
 
     let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
-    // println!("{:?}", &json);//---------------------------- still prints!
+    // println!("{:?}", &json["results"]);//---------------------------- still prints!
     // iterate json_array in order to fill json_clients_list.
     // let mut json_array = json.as_object_mut();
 
-    for object in json["results"].as_object().iter()  {
-        println!("{:?}", &object);
+    for object in json["results"].as_array_mut().iter() {
+        // println!("{:?}", &object);
         for objectling in object.iter() {
-            println!("antes objectling");
-            println!("{:?}", &objectling);
-            println!("depois objectling");
-        //     let client = structs::ClientUnited::new(objectling.clone());
-        //     json_clients_list.push(client);
+            // println!("antes objectling");
+            // println!("{:?}", &objectling);
+            // println!("depois objectling");
+            let client = structs::ClientUnited::new(objectling.clone());
+            json_clients_list.push(client);
         }
     }
     // println!("{:?}", &json_clients_list);
@@ -304,6 +305,7 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
 
         id_counter += 1;
     }
+    // println!("{:#?}", &storage);
     // fn extract_pagination(params: HashMap<String, String>) -> Result<structs::Pagination, Error> {
     //     if params.contains_key("start") && params.contains_key("end") {
     //         return Ok(structs::Pagination { 
@@ -342,8 +344,8 @@ async fn get_clients()/*(params: HashMap<String, String>, mut storage: structs::
     // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
     // println!("{:#?}", &res);
     // println!("{:#?}", params);
-    // Ok(warp::reply::json(&res))
-    res
+    Ok(warp::reply::json(&res))
+    // res
 }
 
 #[tokio::main]
@@ -382,8 +384,8 @@ async fn main() {
     let storage_filter = warp::any().map(move || storage.clone());
 
 
-    let storagee = get_clients().await; 
-    println!("{:?}", storagee);
+    // let storagee = get_clients().await; 
+    // println!("{:?}", storagee);
     // let stringa = String::from("aaa");
     // let stringb = String::from("bbb");
 
@@ -394,13 +396,13 @@ async fn main() {
     // let mut stoolrage = structs::Storage::new();
     // get_clients(params, stoolrage);
 
-    // let get_clients = warp::get()
-    //     .and(warp::path("clients"))
-    //     .and(warp::path::end())
-    //     .and(query())
-    //     .and(storage_filter)
-    //     .and_then(get_clients)
-    //     .recover(return_error);
+    let get_clients = warp::get()
+        .and(warp::path("clients"))
+        .and(warp::path::end())
+        .and(query())
+        .and(storage_filter)
+        .and_then(get_clients)
+        .recover(return_error);
     //
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
@@ -432,7 +434,7 @@ async fn main() {
 
 
 
-    // let routes = get_clients.with(cors);
+    let routes = get_clients.with(cors);
 
-    // warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
