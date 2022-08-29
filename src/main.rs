@@ -340,6 +340,9 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     //     Ok(warp::reply::json(&res))
     // }
     //
+    if let Some(n) = params.get("start") {
+        println!("{:?}", n.parse::<usize>());
+    }
 
     let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
     // println!("{:#?}", &storage.clients.read().await.get(&exclientid));
