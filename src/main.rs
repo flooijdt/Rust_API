@@ -341,9 +341,30 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // }
     //
     /* Applying pagination parameters provided by query*/
+    let mut start = 0;
+ 
     if let Some(n) = params.get("start") {
-        println!("{:?}", n.parse::<usize>());
+       start =  n.parse::<usize>().expect("Could not parse start");
     }
+
+    /* Dealing with pagination errors */
+    #[derive(Debug)]
+    enum Error {
+        ParseError(std::num::ParseIntError),
+        MissingParameters,
+    }
+
+    impl std::fmt::Display for Error {
+        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            match *self {
+                Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
+                Error::MissingParameters => write!(f, "Missing parameter"),
+            }
+        }
+    }
+
+    impl Reject for Error {}
+
 
     let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
     // println!("{:#?}", &storage.clients.read().await.get(&exclientid));
