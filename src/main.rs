@@ -340,6 +340,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     //     Ok(warp::reply::json(&res))
     // }
     //
+    /* Applying pagination parameters provided by query*/
     if let Some(n) = params.get("start") {
         println!("{:?}", n.parse::<usize>());
     }
