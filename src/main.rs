@@ -432,6 +432,15 @@ async fn update_client(id: String, storage: structs::Storage, client: structs::C
     ))
 }
 
+async fn delete_client(
+    id: String,
+    storage: structs::Storage,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match storage.clients.write().await.remove(&structs::ClientId(id)) {
+        Some(_) => Ok(warp::reply::with_status("Client deleted", StatusCode::OK)),
+        None => Err(warp::reject::custom(structs::Error::ClientNotFound)),
+    }
+}
 
 
 #[tokio::main]
@@ -511,38 +520,14 @@ async fn main() {
         .and(warp::body::json())
         .and_then(update_client);
  
-    //
-    // let get_clients = warp::get()
-    //     .and(warp::path("clients"))
-    //     .and(warp::path::end())
-    //     .and(query())
-    //     .and(storage_filter)
-    //     .map(|a, b| async get_clients(a, b).await.unwrap())
-    //     .recover(return_error);
-    // fn extract_pagination(params: HashMap<String, String>) -> Result<structs::Pagination, Error> {
-    //     if params.contains_key("start") && params.contains_key("end") {
-    //         return Ok(structs::Pagination { 
-    //             start: params
-    //                 .get("start")
-    //                 .unwrap()
-    //                 .parse::<usize>()
-    //                 .map_err(Error::ParseError)?,
-    //             end: params
-    //                 .get("end")
-    //                 .unwrap()
-    //                 .parse::<usize>()
-    //                 .map_err(Error::ParseError)?,
-    //         });
-    //     }
-    //  
-    // Err(Error::MissingParameters)
-    // }
-    //
+    let delete_client = warp::delete()
+        .and(warp::path("clients"))
+        .and(warp::path::param::<String>())
+        .and(warp::path::end())
+        .and(storage_filter.clone())
+        .and_then(delete_client);
 
-
-
-
-    let routes = get_clients.or(add_client).or(update_client).with(cors).recover(return_error);
+    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
