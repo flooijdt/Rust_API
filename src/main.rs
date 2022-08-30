@@ -2,6 +2,7 @@ use csv::{self, Reader};
 use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
+use structs::Storage;
 use std::vec::Vec;
 use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{cors::CorsForbidden}, query};
 use tokio::{sync::RwLock, task};
@@ -341,10 +342,14 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // }
     //
     /* Applying pagination parameters provided by query*/
-    let mut start = 0;
- 
-    if let Some(n) = params.get("start") {
-       start =  n.parse::<usize>().expect("Could not parse start");
+    if !params.is_empty() {
+        let pagination = extract_pagination(params)?;
+        let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
+        let res = &res[pagination.start..pagination.end];
+        return Ok(warp::reply::json(&res));
+    } else {
+        let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
+        return Ok(warp::reply::json(&res));
     }
 
     /* Dealing with pagination errors */
@@ -352,6 +357,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     enum Error {
         ParseError(std::num::ParseIntError),
         MissingParameters,
+        ClientNotFound,
     }
 
     impl std::fmt::Display for Error {
@@ -359,11 +365,39 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
             match *self {
                 Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
                 Error::MissingParameters => write!(f, "Missing parameter"),
+                Error::ClientNotFound => write!(f, "Client not found"),
             }
         }
     }
 
     impl Reject for Error {}
+
+    #[derive(Debug)]
+    struct Pagination {
+        start: usize,
+        end: usize,
+    }
+
+    fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, Error> {
+        if params.contains_key("start") && params.contains_key("end") {
+            return Ok(Pagination {
+                start: params
+                    .get("start")
+                    .unwrap()
+                    .parse::<usize>()
+                    .map_err(Error::ParseError)?,
+                end: params
+                    .get("end")
+                    .unwrap()
+                    .parse::<usize>()
+                    .map_err(Error::ParseError)?,
+            });
+        }
+     
+        Err(Error::MissingParameters)
+    }
+
+
 
 
     let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
@@ -376,6 +410,28 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     Ok(warp::reply::json(&res))
     // res
 }
+
+async fn add_client(storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
+    storage.clients.write().await.insert(client.id.clone(), client);
+ 
+    Ok(warp::reply::with_status(
+        "Client added",
+        StatusCode::OK,
+    ))
+}
+
+async fn update_client(id: String, storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
+    match storage.clients.write().await.get_mut(&structs::ClientId(id)) {
+        Some(c) => *c = client,
+        None => return Err(warp::reject::custom(Error::ClientNotFound)),
+    }
+ 
+    Ok(warp::reply::with_status(
+        "Question updated",
+        StatusCode::OK,
+    ))
+}
+
 
 #[tokio::main]
 async fn main() {
@@ -390,7 +446,12 @@ async fn main() {
     impl Reject for InvalidId {}
 
     async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-        if let Some(error) = r.find::<CorsForbidden>() {
+        if let Some(error) = r.find::<Error>() {
+            Ok(warp::reply::with_status(
+                error.to_string(),
+                StatusCode::RANGE_NOT_SATISFIABLE,
+            ))
+        }else if let Some(error) = r.find::<CorsForbidden>() {
             Ok(warp::reply::with_status(
                 error.to_string(),
                 StatusCode::FORBIDDEN,
@@ -429,9 +490,18 @@ async fn main() {
         .and(warp::path("clients"))
         .and(warp::path::end())
         .and(query())
-        .and(storage_filter)
-        .and_then(get_clients)
-        .recover(return_error);
+        .and(storage_filter.clone())
+        .and_then(get_clients);
+
+
+    let add_client = warp::post()
+        .and(warp::path("clients"))
+        .and(warp::path::end())
+        .and(storage_filter.clone())
+        .and(warp::body::json())
+        .and_then(add_client);
+ 
+
     //
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
@@ -463,7 +533,7 @@ async fn main() {
 
 
 
-    let routes = get_clients.with(cors);
+    let routes = get_clients.or(add_client).with(cors).recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
