@@ -4,7 +4,7 @@ use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use structs::Storage;
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{cors::CorsForbidden}, query};
+use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{body::BodyDeserializeError, cors::CorsForbidden}, query};
 use tokio::{sync::RwLock, task};
 use std::sync::Arc;
 use std::collections::HashMap;
@@ -423,14 +423,15 @@ async fn add_client(storage: structs::Storage, client: structs::Client) -> Resul
 async fn update_client(id: String, storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
     match storage.clients.write().await.get_mut(&structs::ClientId(id)) {
         Some(c) => *c = client,
-        None => return Err(warp::reject::custom(Error::ClientNotFound)),
+        None => return Err(warp::reject::custom(structs::Error::ClientNotFound)),
     }
  
     Ok(warp::reply::with_status(
-        "Question updated",
+        "Client updated",
         StatusCode::OK,
     ))
 }
+
 
 
 #[tokio::main]
@@ -456,9 +457,9 @@ async fn main() {
                 error.to_string(),
                 StatusCode::FORBIDDEN,
             ))
-        } else if let Some(InvalidId) = r.find() {
+        } else if let Some(error) = r.find::<BodyDeserializeError>() {
             Ok(warp::reply::with_status(
-                "No valid ID presented".to_string(),
+                error.to_string(),
                 StatusCode::UNPROCESSABLE_ENTITY,
             ))
         }  else {
@@ -502,6 +503,14 @@ async fn main() {
         .and_then(add_client);
  
 
+    let update_client = warp::put()
+        .and(warp::path("clients"))
+        .and(warp::path::param::<String>())
+        .and(warp::path::end())
+        .and(storage_filter.clone())
+        .and(warp::body::json())
+        .and_then(update_client);
+ 
     //
     // let get_clients = warp::get()
     //     .and(warp::path("clients"))
@@ -533,7 +542,7 @@ async fn main() {
 
 
 
-    let routes = get_clients.or(add_client).with(cors).recover(return_error);
+    let routes = get_clients.or(add_client).or(update_client).with(cors).recover(return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
