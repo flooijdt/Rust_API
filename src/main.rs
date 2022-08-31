@@ -24,7 +24,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         let client = Client::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
-    // let mut json = res.f;
     
 
     // convert Response to json.
