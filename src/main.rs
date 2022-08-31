@@ -4,11 +4,14 @@ use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
 use structs::Storage;
 use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{body::BodyDeserializeError, cors::CorsForbidden}, query};
+use warp::{Filter, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{body::BodyDeserializeError, cors::CorsForbidden}, query};
 use tokio::{sync::RwLock, task};
 use std::sync::Arc;
 use std::collections::HashMap;
 use reqwest::blocking::Client;
+mod error;
+use crate::error::Error;
+use crate::error::return_error;
 pub mod structs;
 
 async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<warp::reply::Json, Rejection>{
@@ -311,26 +314,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         return Ok(warp::reply::json(&res));
     }
 
-    /* Dealing with pagination errors */
-    #[derive(Debug)]
-    enum Error {
-        ParseError(std::num::ParseIntError),
-        MissingParameters,
-        ClientNotFound,
-    }
-
-    impl std::fmt::Display for Error {
-        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            match *self {
-                Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
-                Error::MissingParameters => write!(f, "Missing parameter"),
-                Error::ClientNotFound => write!(f, "Client not found"),
-            }
-        }
-    }
-
-    impl Reject for Error {}
-
     #[derive(Debug)]
     struct Pagination {
         start: usize,
@@ -413,30 +396,6 @@ async fn main() {
     struct InvalidId;
     impl Reject for InvalidId {}
 
-    async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-        if let Some(error) = r.find::<Error>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::RANGE_NOT_SATISFIABLE,
-            ))
-        }else if let Some(error) = r.find::<CorsForbidden>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::FORBIDDEN,
-            ))
-        } else if let Some(error) = r.find::<BodyDeserializeError>() {
-            Ok(warp::reply::with_status(
-                error.to_string(),
-                StatusCode::UNPROCESSABLE_ENTITY,
-            ))
-        }  else {
-            Ok(warp::reply::with_status(
-                "Route not found".to_string(),
-                StatusCode::NOT_FOUND,
-            ))
-        }
-    }
-
     let mut storage = structs::Storage::new();
 
     let storage_filter = warp::any().map(move || storage.clone());
@@ -484,7 +443,6 @@ async fn main() {
         .and(warp::path::end())
         .and(storage_filter.clone())
         .and_then(delete_client);
-
 
 
     let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);

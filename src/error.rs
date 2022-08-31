@@ -1,3 +1,10 @@
+use warp::{
+    filters::{body::BodyDeserializeError, cors::CorsForbidden},
+    http::StatusCode,
+    reject::Reject,
+    Rejection, Reply,
+};
+
 /* Dealing with pagination errors */
 #[derive(Debug)]
 pub enum Error {
@@ -18,11 +25,11 @@ impl std::fmt::Display for Error {
 
 impl Reject for Error {}
 
-#[derive(Debug)]
-struct InvalidId;
-impl Reject for InvalidId {}
+// #[derive(Debug)]
+// struct InvalidId;
+// impl Reject for InvalidId {}
 
-async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     if let Some(error) = r.find::<Error>() {
         Ok(warp::reply::with_status(
             error.to_string(),
