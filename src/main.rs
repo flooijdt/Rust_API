@@ -300,37 +300,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
         id_counter += 1;
     }
-    // println!("{:#?}", &storage);
-    // fn extract_pagination(params: HashMap<String, String>) -> Result<structs::Pagination, Error> {
-    //     if params.contains_key("start") && params.contains_key("end") {
-    //         return Ok(structs::Pagination { 
-    //             start: params
-    //                 .get("start")
-    //                 .unwrap()
-    //                 .parse::<usize>()
-    //                 .unwrap(),
-    //             end: params
-    //                 .get("end")
-    //                 .unwrap()
-    //                 .parse::<usize>()
-    //                 .unwrap(),
-    //         });
-    //     }
-    //  
-    // Err(_)
-    // }
-    //
-    //
-    // if !params.is_empty() {
-    //     let pagination = extract_pagination(params)?;
-    //     let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
-    //     let res = &res[pagination.start..pagination.end];
-    //     Ok(warp::reply::json(&res))
-    // } else {
-    //     let res: Vec<structs::Client> = storage.clients.values().cloned().collect();
-    //     Ok(warp::reply::json(&res))
-    // }
-    //
     /* Applying pagination parameters provided by query*/
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
