@@ -408,7 +408,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // println!("{:#?}", &res);
     // println!("{:#?}", params);
     Ok(warp::reply::json(&res))
-    // res
 }
 
 async fn add_client(storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
@@ -526,6 +525,8 @@ async fn main() {
         .and(warp::path::end())
         .and(storage_filter.clone())
         .and_then(delete_client);
+
+
 
     let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);
 
