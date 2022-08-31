@@ -16,7 +16,6 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
     // do some compute-heavy work or call synchronous code
-
         let client = Client::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()
     }).await.unwrap();
