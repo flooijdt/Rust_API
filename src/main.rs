@@ -10,7 +10,7 @@ use crate::route::{get_clients, update_client, add_client, delete_client};
 
 #[tokio::main]
 async fn main() {
-/* Creates cors filter */
+    /* Creates cors filter */
     let cors = warp::cors()
         .allow_any_origin()
         .allow_header("content-type")
@@ -35,7 +35,7 @@ async fn main() {
         .and(storage_filter.clone())
         .and(warp::body::json())
         .and_then(add_client);
- 
+
 
     let update_client = warp::put()
         .and(warp::path("clients"))
@@ -44,7 +44,7 @@ async fn main() {
         .and(storage_filter.clone())
         .and(warp::body::json())
         .and_then(update_client);
- 
+
     let delete_client = warp::delete()
         .and(warp::path("clients"))
         .and(warp::path::param::<String>())

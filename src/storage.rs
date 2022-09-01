@@ -20,7 +20,7 @@ pub async fn get_storage() -> Storage {
     let storage = Storage::new();
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
-    // do some compute-heavy work or call synchronous code
+        // do some compute-heavy work or call synchronous code
         let client = ClientDl::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()
     }).await.unwrap();
@@ -29,7 +29,7 @@ pub async fn get_storage() -> Storage {
         let client = ClientDl::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
-    
+
 
     // convert Response to json.
     let mut json: Value = serde_json::from_str(resp.as_str()).unwrap();
@@ -90,8 +90,8 @@ pub async fn get_storage() -> Storage {
                 },
             };
             // println!("{:#?}", &result);
-        json_clients_list.push(result);
-    }}
+            json_clients_list.push(result);
+        }}
     // create final Client struct according to desired output.
     let special1 = LocationCoordinates {
         minlon: -2.196998,
@@ -162,96 +162,96 @@ pub async fn get_storage() -> Storage {
         }
 
         if client.location.state == "rio grande do sul"
-            || client.location.state == "santa catarina"
-            || client.location.state == "paraná"
+        || client.location.state == "santa catarina"
+        || client.location.state == "paraná"
         {
             client.location.region = String::from("sul");
         } else if client.location.state == "espírito santo"
-            || client.location.state == "rio de janeiro"
-            || client.location.state == "minas gerais"
-            || client.location.state == "são paulo"
+        || client.location.state == "rio de janeiro"
+        || client.location.state == "minas gerais"
+        || client.location.state == "são paulo"
         {
             client.location.region = String::from("sudeste");
         } else if client.location.state == "mato grosso"
-            || client.location.state == "mato grosso do sul"
-            || client.location.state == "goiás"
-            || client.location.state == "distrito federal"
+        || client.location.state == "mato grosso do sul"
+        || client.location.state == "goiás"
+        || client.location.state == "distrito federal"
         {
             client.location.region = String::from("centro-oeste");
         } else if client.location.state == "acre"
-            || client.location.state == "amazonas"
-            || client.location.state == "rondônia"
-            || client.location.state == "amapá"
-            || client.location.state == "roraima"
-            || client.location.state == "pará"
-            || client.location.state == "tocantins"
+        || client.location.state == "amazonas"
+        || client.location.state == "rondônia"
+        || client.location.state == "amapá"
+        || client.location.state == "roraima"
+        || client.location.state == "pará"
+        || client.location.state == "tocantins"
         {
             client.location.region = String::from("norte");
         } else if client.location.state == "bahia"
-            || client.location.state == "sergipe"
-            || client.location.state == "alagoas"
-            || client.location.state == "paraíba"
-            || client.location.state == "pernambuco"
-            || client.location.state == "rio grande do norte"
-            || client.location.state == "ceará"
-            || client.location.state == "piauí"
-            || client.location.state == "maranhão"
+        || client.location.state == "sergipe"
+        || client.location.state == "alagoas"
+        || client.location.state == "paraíba"
+        || client.location.state == "pernambuco"
+        || client.location.state == "rio grande do norte"
+        || client.location.state == "ceará"
+        || client.location.state == "piauí"
+        || client.location.state == "maranhão"
         {
             client.location.region = String::from("nordeste");
         }
 
         if special1.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
-            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special1.maxlat
-            && special1.minlon
-                <= client
-                    .location
-                    .coordinates
-                    .longitude
-                    .parse::<f64>()
-                    .unwrap()
-            && client
-                .location
-                .coordinates
-                .longitude
-                .parse::<f64>()
-                .unwrap()
-                <= special1.maxlon
+        && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special1.maxlat
+        && special1.minlon
+        <= client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        && client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        <= special1.maxlon
         {
             client.r#type = String::from("special");
         } else if special2.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
-            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat
-            && special2.minlon
-                <= client
-                    .location
-                    .coordinates
-                    .longitude
-                    .parse::<f64>()
-                    .unwrap()
-            && client
-                .location
-                .coordinates
-                .longitude
-                .parse::<f64>()
-                .unwrap()
-                <= special2.maxlon
+        && client.location.coordinates.latitude.parse::<f64>().unwrap() <= special2.maxlat
+        && special2.minlon
+        <= client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        && client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        <= special2.maxlon
         {
             client.r#type = String::from("special");
         } else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
-            && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat
-            && normal.minlon
-                <= client
-                    .location
-                    .coordinates
-                    .longitude
-                    .parse::<f64>()
-                    .unwrap()
-            && client
-                .location
-                .coordinates
-                .longitude
-                .parse::<f64>()
-                .unwrap()
-                <= normal.maxlon
+        && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat
+        && normal.minlon
+        <= client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        && client
+            .location
+            .coordinates
+            .longitude
+            .parse::<f64>()
+            .unwrap()
+        <= normal.maxlon
         {
             client.r#type = String::from("normal");
         } else {

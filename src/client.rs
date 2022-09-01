@@ -105,7 +105,7 @@ impl ClientCSV {
 
 
 
- // create final Client struct according to desired output.
+// create final Client struct according to desired output.
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Client {
     pub id: ClientId,
@@ -144,6 +144,4 @@ pub struct LocationCoordinates {
 
 #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash)]
 pub struct ClientId (pub String);
-
-
 

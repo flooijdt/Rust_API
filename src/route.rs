@@ -40,7 +40,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
                     .map_err(Error::ParseError)?,
             });
         }
-     
+
         Err(Error::MissingParameters)
     }
 
@@ -51,7 +51,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
 
 pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
     storage.clients.write().await.insert(client.id.clone(), client);
- 
+
     Ok(warp::reply::with_status(
         "Client added",
         StatusCode::OK,
@@ -63,7 +63,7 @@ pub async fn update_client(id: String, storage: Storage, client: Client) -> Resu
         Some(c) => *c = client,
         None => return Err(warp::reject::custom(Error::ClientNotFound)),
     }
- 
+
     Ok(warp::reply::with_status(
         "Client updated",
         StatusCode::OK,
