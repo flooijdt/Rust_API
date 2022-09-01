@@ -15,7 +15,7 @@ mod route;
 use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
 use crate::error::Error;
 use crate::error::return_error;
-use crate::storage::Storage;
+use crate::storage::{Storage, get_storage};
 use crate::route::{get_clients, update_client, add_client, delete_client};
 
 
@@ -27,7 +27,8 @@ async fn main() {
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
-    let mut storage = Storage::new();
+    // let mut storage = Storage::new();
+    let storage = get_storage();
 
     let storage_filter = warp::any().map(move || storage.clone());
 
