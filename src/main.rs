@@ -37,6 +37,7 @@ async fn main() {
         .and(warp::path("clients"))
         .and(warp::path::end())
         .and(storage_filter.clone())
+        /* Receives th Client to be added in json */
         .and(warp::body::json())
         .and_then(add_client);
 
