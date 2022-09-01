@@ -16,11 +16,11 @@ async fn main() {
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
-    // let mut storage = Storage::new();
+    /* Gets Clients data from juntos server into the storage variable */
     let storage = get_storage().await;
-
+    /* Creates a filter for manipulating storage */
     let storage_filter = warp::any().map(move || storage.clone());
-
+    /* Creates a filter for managing GET Requests for storage data */
     let get_clients = warp::get()
         .and(warp::path("clients"))
         .and(warp::path::end())
@@ -28,7 +28,7 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(get_clients);
 
-
+    /* Creates a filter for managing POST Requests */
     let add_client = warp::post()
         .and(warp::path("clients"))
         .and(warp::path::end())
@@ -37,6 +37,7 @@ async fn main() {
         .and_then(add_client);
 
 
+    /* Creates a filter for managing PUT Requests */
     let update_client = warp::put()
         .and(warp::path("clients"))
         .and(warp::path::param::<String>())
@@ -45,6 +46,7 @@ async fn main() {
         .and(warp::body::json())
         .and_then(update_client);
 
+    /* Creates a filter for managing DELETE Requests */
     let delete_client = warp::delete()
         .and(warp::path("clients"))
         .and(warp::path::param::<String>())
@@ -52,9 +54,10 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(delete_client);
 
-
+    /* Creates route to be served by combining all previous filters plus the error management module */
     let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);
 
+    /* Starts server on the below designated port */
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
 
