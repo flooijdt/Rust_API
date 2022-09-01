@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use tokio::sync::RwLock;
 use std::sync::Arc;
-pub mod clients;
+use crate::client::{ClientId, Client};
 
 #[derive(Debug, Clone)]
 pub struct Storage { pub clients: Arc<RwLock<HashMap<ClientId, Client>>>}

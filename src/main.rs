@@ -2,18 +2,19 @@ use csv::{self, Reader};
 use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
-use Storage;
 use std::vec::Vec;
 use warp::{Filter, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{body::BodyDeserializeError, cors::CorsForbidden}, query};
 use tokio::{sync::RwLock, task};
 use std::sync::Arc;
 use std::collections::HashMap;
 use reqwest::blocking::Client as ClientDl;
+mod client;
 mod error;
+mod storage;
+use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
 use crate::error::Error;
 use crate::error::return_error;
-pub mod client;
-use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
+use crate::storage::Storage;
 
 
 async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
