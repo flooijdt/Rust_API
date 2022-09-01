@@ -391,15 +391,10 @@ async fn main() {
         .allow_any_origin()
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
-/* Deals with errors (Rejections) */
-    #[derive(Debug)]
-    struct InvalidId;
-    impl Reject for InvalidId {}
 
     let mut storage = structs::Storage::new();
 
     let storage_filter = warp::any().map(move || storage.clone());
-
 
     let get_clients = warp::get()
         .and(warp::path("clients"))
