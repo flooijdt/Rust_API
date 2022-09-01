@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 use tokio::sync::RwLock;
 use std::sync::Arc;
-use crate::client::{ClientId, Client};
+use serde_json::Value;
+use std::vec::Vec;
+use tokio::task;
+use reqwest::blocking::Client as ClientDl;
+use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
 
 #[derive(Debug, Clone)]
 pub struct Storage { pub clients: Arc<RwLock<HashMap<ClientId, Client>>>}
@@ -12,7 +16,7 @@ impl Storage {
     }
 }
 
-pub fn get_storage() -> Storage {
+pub async fn get_storage() -> Storage {
     let storage = Storage::new();
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
