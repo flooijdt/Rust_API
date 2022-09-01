@@ -28,15 +28,6 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     let mut json: Value = serde_json::from_str(resp.as_str()).unwrap();
     // create list with for Client structs.
     let mut json_clients_list: Vec<ClientUnited> = Vec::new();
-    // clone json as an array for iteration.
-    // let mut json_array = json.clone();
-
-    // println!("{:?}", &json_array);//-----------------------------------------does not print
-
-    // let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
-    // println!("{:?}", &json["results"]);//---------------------------- still prints!
-    // iterate json_array in order to fill json_clients_list.
-    // let mut json_array = json.as_object_mut();
 
     for object in json["results"].as_array_mut().iter() {
         // println!("{:?}", &object);
@@ -48,25 +39,11 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             json_clients_list.push(client);
         }
     }
-    // println!("{:?}", &json_clients_list);
-    // get csv containing user data from source.
-    // let mut json2: Value = resp2.into();//-------------------------------------o problema aqui é que esses dados sao CSV - será que é por isso que nao sao iteraveis??
-    // convert response to Reader, for file tempering.
-    // let mut json2  = csv::Reader::from_reader(response_csv);
 
     let mut json2  = csv::Reader::from_reader(resp2.as_bytes());
-    // println!("{:?}", &json2);// -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
     for result in json2.deserialize::<Vec<ClientCSV>>() {
-        // println!("{:?}", &result);
-    // 
         for result in result.unwrap() {
-    //         // println!("{:?}", &result);
-            // println!("{:?}", &result);    
-            // let mut result = ClientCSV::new(result);
-            // println!("{:?}", &result);   
-    
-            // result = result.clone();
             let mut result: ClientUnited = ClientUnited {
                 cell: result.cell,
                 dob: Dob {
@@ -108,7 +85,6 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             // println!("{:#?}", &result);
         json_clients_list.push(result);
     }}
-    // println!("{:?}", &json_clients_list);
     // create final Client struct according to desired output.
     let special1 = LocationCoordinates {
         minlon: -2.196998,
@@ -334,16 +310,10 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         Err(Error::MissingParameters)
     }
 
-
-
-
     let exclientid: ClientId = ClientId(String::from("34"));
-    // println!("{:#?}", &storage.clients.read().await.get(&exclientid));
+
     let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
 
-    // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
-    // println!("{:#?}", &res);
-    // println!("{:#?}", params);
     Ok(warp::reply::json(&res))
 }
 
