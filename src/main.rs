@@ -13,6 +13,9 @@ mod error;
 use crate::error::Error;
 use crate::error::return_error;
 pub mod structs;
+pub mod client;
+use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name}
+
 
 async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<warp::reply::Json, Rejection>{
 
