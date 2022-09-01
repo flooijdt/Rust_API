@@ -1,10 +1,7 @@
-use serde_json::Value;
 use std::vec::Vec;
 use warp::{Rejection, http::StatusCode};
-use tokio::task;
 use std::collections::HashMap;
-use reqwest::blocking::Client as ClientDl;
-use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
+use crate::client::{ClientId, Client};
 use crate::error::Error;
 use crate::storage::Storage;
 
@@ -46,8 +43,6 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
      
         Err(Error::MissingParameters)
     }
-
-    let exclientid: ClientId = ClientId(String::from("34"));
 
     let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
 
