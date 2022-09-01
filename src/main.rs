@@ -2,32 +2,31 @@ use csv::{self, Reader};
 use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
 use serde_json::{Map, Value, Value::Object, json};
-use structs::Storage;
+use Storage;
 use std::vec::Vec;
 use warp::{Filter, Rejection, Reply, http::StatusCode, reject::Reject, http::Method, filters::{body::BodyDeserializeError, cors::CorsForbidden}, query};
 use tokio::{sync::RwLock, task};
 use std::sync::Arc;
 use std::collections::HashMap;
-use reqwest::blocking::Client;
+use reqwest::blocking::Client as ClientDl;
 mod error;
 use crate::error::Error;
 use crate::error::return_error;
-pub mod structs;
 pub mod client;
-use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name}
+use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
 
 
-async fn get_clients(params: HashMap<String, String>, mut storage: structs::Storage) -> Result<warp::reply::Json, Rejection>{
+async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
 
     // get Response containing user data from source.
     let resp: String = task::spawn_blocking(|| {
     // do some compute-heavy work or call synchronous code
-        let client = Client::new();
+        let client = ClientDl::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json").send().unwrap().text().unwrap()
     }).await.unwrap();
 
     let resp2: String = task::spawn_blocking(|| { 
-        let client = Client::new();
+        let client = ClientDl::new();
         client.get("https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.csv").send().unwrap().text().unwrap()
     }).await.unwrap();
     
@@ -35,7 +34,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     // convert Response to json.
     let mut json: Value = serde_json::from_str(resp.as_str()).unwrap();
     // create list with for Client structs.
-    let mut json_clients_list: Vec<structs::ClientUnited> = Vec::new();
+    let mut json_clients_list: Vec<ClientUnited> = Vec::new();
     // clone json as an array for iteration.
     // let mut json_array = json.clone();
 
@@ -52,7 +51,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
             // println!("antes objectling");
             // println!("{:?}", &objectling);
             // println!("depois objectling");
-            let client = structs::ClientUnited::new(objectling.clone());
+            let client = ClientUnited::new(objectling.clone());
             json_clients_list.push(client);
         }
     }
@@ -65,50 +64,50 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     let mut json2  = csv::Reader::from_reader(resp2.as_bytes());
     // println!("{:?}", &json2);// -----------------------------------------------até aqui (json2) print os customers.
     // convert ClientCSV to Client struct.
-    for result in json2.deserialize::<Vec<structs::ClientCSV>>() {
+    for result in json2.deserialize::<Vec<ClientCSV>>() {
         // println!("{:?}", &result);
     // 
         for result in result.unwrap() {
     //         // println!("{:?}", &result);
             // println!("{:?}", &result);    
-            // let mut result = structs::ClientCSV::new(result);
+            // let mut result = ClientCSV::new(result);
             // println!("{:?}", &result);   
     
             // result = result.clone();
-            let mut result: structs::ClientUnited = structs::ClientUnited {
+            let mut result: ClientUnited = ClientUnited {
                 cell: result.cell,
-                dob: structs::Dob {
+                dob: Dob {
                     age: result.dob__age,
                     date: result.dob__date,
                 },
                 email: result.email,
                 gender: result.gender,
-                location: structs::Location {
+                location: Location {
                     city: result.location__city,
-                    coordinates: structs::Coordinates {
+                    coordinates: Coordinates {
                         latitude: result.location__coordinates__latitude.to_string(),
                         longitude: result.location__coordinates__longitude.to_string(),
                     },
                     postcode: result.location__postcode,
                     state: result.location__state,
                     street: result.location__street,
-                    timezone: structs::Timezone {
+                    timezone: Timezone {
                         description: result.location__timezone__description,
                         offset: result.location__timezone__offset,
                     },
                 },
-                name: structs::Name {
+                name: Name {
                     first: result.name__first,
                     last: result.name__last,
                     title: result.name__title,
                 },
                 phone: result.phone,
-                picture: structs::Picture {
+                picture: Picture {
                     large: result.picture__large,
                     medium: result.picture__medium,
                     thumbnail: result.picture__thumbnail,
                 },
-                registered: structs::Registered {
+                registered: Registered {
                     age: result.registered__age,
                     date: result.registered__date,
                 },
@@ -118,21 +117,21 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     }}
     // println!("{:?}", &json_clients_list);
     // create final Client struct according to desired output.
-    let special1 = structs::LocationCoordinates {
+    let special1 = LocationCoordinates {
         minlon: -2.196998,
         minlat: -46.361899,
         maxlon: -15.411580,
         maxlat: -34.276938,
     };
 
-    let special2 = structs::LocationCoordinates {
+    let special2 = LocationCoordinates {
         minlon: -19.766959,
         minlat: -52.997614,
         maxlon: -23.966413,
         maxlat: -44.428305,
     };
 
-    let normal = structs::LocationCoordinates {
+    let normal = LocationCoordinates {
         minlon: -26.155681,
         minlat: -54.777426,
         maxlon: -34.016466,
@@ -143,26 +142,26 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
     for client in json_clients_list.iter() {        
         let client = client.clone();
-        let mut client: structs::Client = structs::Client {
-            id: structs::ClientId(String::from("placeholder")),
+        let mut client: Client = Client {
+            id: ClientId(String::from("placeholder")),
             r#type: String::from("placeholder"),
             gender: client.gender,
-            name: structs::Name {
+            name: Name {
                 title: client.name.title,
                 first: client.name.first,
                 last: client.name.last,
             },
-            location: structs::Location2 {
+            location: Location2 {
                 region: String::from("placeholder"),
                 street: client.location.street,
                 city: client.location.city,
                 state: client.location.state,
                 postcode: client.location.postcode,
-                coordinates: structs::Coordinates {
+                coordinates: Coordinates {
                     latitude: client.location.coordinates.latitude,
                     longitude: client.location.coordinates.longitude,
                 },
-                timezone: structs::Timezone {
+                timezone: Timezone {
                     offset: client.location.timezone.offset,
                     description: client.location.timezone.description,
                 },
@@ -172,7 +171,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
             registered: client.registered.date,
             telephoneNumbers: vec![client.phone],
             mobileNumbers: vec![client.cell],
-            picture: structs::Picture {
+            picture: Picture {
                 large: client.picture.large,
                 medium: client.picture.medium,
                 thumbnail: client.picture.thumbnail,
@@ -299,7 +298,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
         brcode.push_str(client.mobileNumbers[0].clone().as_str());
         client.mobileNumbers[0] = brcode;
 
-        client.id = structs::ClientId(id_counter.to_string());
+        client.id = ClientId(id_counter.to_string());
 
         // println!("{:#?}", &client);
         storage.clients.write().await.insert(client.id.clone(), client);
@@ -309,11 +308,11 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     /* Applying pagination parameters provided by query*/
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
-        let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
+        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         let res = &res[pagination.start..pagination.end];
         return Ok(warp::reply::json(&res));
     } else {
-        let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
+        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }
 
@@ -345,9 +344,9 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
 
 
 
-    let exclientid: structs::ClientId = structs::ClientId(String::from("34"));
+    let exclientid: ClientId = ClientId(String::from("34"));
     // println!("{:#?}", &storage.clients.read().await.get(&exclientid));
-    let res: Vec<structs::Client> = storage.clients.read().await.values().cloned().collect();
+    let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
 
     // let res = &res[params.get("start").unwrap()..params.get("end").unwrap()];
     // println!("{:#?}", &res);
@@ -355,7 +354,7 @@ async fn get_clients(params: HashMap<String, String>, mut storage: structs::Stor
     Ok(warp::reply::json(&res))
 }
 
-async fn add_client(storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
+async fn add_client(storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
     storage.clients.write().await.insert(client.id.clone(), client);
  
     Ok(warp::reply::with_status(
@@ -364,10 +363,10 @@ async fn add_client(storage: structs::Storage, client: structs::Client) -> Resul
     ))
 }
 
-async fn update_client(id: String, storage: structs::Storage, client: structs::Client) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.get_mut(&structs::ClientId(id)) {
+async fn update_client(id: String, storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
+    match storage.clients.write().await.get_mut(&ClientId(id)) {
         Some(c) => *c = client,
-        None => return Err(warp::reject::custom(structs::Error::ClientNotFound)),
+        None => return Err(warp::reject::custom(Error::ClientNotFound)),
     }
  
     Ok(warp::reply::with_status(
@@ -378,11 +377,11 @@ async fn update_client(id: String, storage: structs::Storage, client: structs::C
 
 async fn delete_client(
     id: String,
-    storage: structs::Storage,
+    storage: Storage,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.remove(&structs::ClientId(id)) {
+    match storage.clients.write().await.remove(&ClientId(id)) {
         Some(_) => Ok(warp::reply::with_status("Client deleted", StatusCode::OK)),
-        None => Err(warp::reject::custom(structs::Error::ClientNotFound)),
+        None => Err(warp::reject::custom(Error::ClientNotFound)),
     }
 }
 
@@ -395,7 +394,7 @@ async fn main() {
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
-    let mut storage = structs::Storage::new();
+    let mut storage = Storage::new();
 
     let storage_filter = warp::any().map(move || storage.clone());
 
