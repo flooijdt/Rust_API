@@ -32,26 +32,27 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(get_clients);
 
-    /* Creates a filter for managing POST Requests */
+    /* Creates a filter for managing POST Requests. */
     let add_client = warp::post()
         .and(warp::path("clients"))
         .and(warp::path::end())
         .and(storage_filter.clone())
-        /* Receives th Client to be added in json */
+        /* Receives th Client to be added in json. */
         .and(warp::body::json())
         .and_then(add_client);
 
 
-    /* Creates a filter for managing PUT Requests */
+    /* Creates a filter for managing PUT Requests. */
     let update_client = warp::put()
         .and(warp::path("clients"))
+        /* Receive parameters via the path and parse them as Strings */
         .and(warp::path::param::<String>())
         .and(warp::path::end())
         .and(storage_filter.clone())
         .and(warp::body::json())
         .and_then(update_client);
 
-    /* Creates a filter for managing DELETE Requests */
+    /* Creates a filter for managing DELETE Requests. */
     let delete_client = warp::delete()
         .and(warp::path("clients"))
         .and(warp::path::param::<String>())
@@ -59,10 +60,10 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(delete_client);
 
-    /* Creates route to be served by combining all previous filters plus the error management module */
+    /* Creates route to be served by combining all previous filters plus the error management module. */
     let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);
 
-    /* Starts server on the below designated port */
+    /* Starts server on the below designated port. */
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
 
