@@ -5,10 +5,10 @@ use crate::client::{ClientId, Client};
 use crate::error::Error;
 use crate::storage::Storage;
 
-
+/** Implements GET function. */
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
 
-    /* Applying pagination parameters provided by query*/
+    /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
@@ -18,13 +18,14 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }
-
+    /** Creates a pagination struct in order to organize the incoming parameters. */
     #[derive(Debug)]
     struct Pagination {
         start: usize,
         end: usize,
     }
 
+    /** Organizes the params into the `Pagination` struct. */
     fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, Error> {
         if params.contains_key("start") && params.contains_key("end") {
             return Ok(Pagination {
@@ -43,12 +44,12 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
 
         Err(Error::MissingParameters)
     }
-
+    /* Gets clients data and organizes it in a `Vector` for display. */
     let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-
+    /* Converts `Vector` into `JSON`. */
     Ok(warp::reply::json(&res))
 }
-
+/** Implements the POST function. */
 pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
     storage.clients.write().await.insert(client.id.clone(), client);
 
@@ -57,7 +58,7 @@ pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::R
         StatusCode::OK,
     ))
 }
-
+/** Implements the PUT function. */
 pub async fn update_client(id: String, storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
     match storage.clients.write().await.get_mut(&ClientId(id)) {
         Some(c) => *c = client,
@@ -69,7 +70,7 @@ pub async fn update_client(id: String, storage: Storage, client: Client) -> Resu
         StatusCode::OK,
     ))
 }
-
+/** Implements the DELETE function. */
 pub async fn delete_client(
     id: String,
     storage: Storage,

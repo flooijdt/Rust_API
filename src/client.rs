@@ -48,7 +48,7 @@ pub struct Registered {
     pub age: u32,
     pub date: String,
 }
-
+/** Creates intermediary client struct for unifying the `CSV` date with the `JSON` data. */
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct ClientUnited {
     pub cell: String,
@@ -69,7 +69,7 @@ impl ClientUnited {
     }
 }
 
-// convert response to Reader, for file tempering.
+/** Receives `CSV` data and organizes it before parsing it to the final Client struct. */
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct ClientCSV {
     pub gender: String,
@@ -95,7 +95,7 @@ pub struct ClientCSV {
     pub picture__medium: String,
     pub picture__thumbnail: String,
 }
-
+/** Implements the new function for `ClientCSV` for parsing clients to `JSON`. */
 impl ClientCSV {
     pub fn new(value: Value) -> Self {
         let client: ClientCSV = serde_json::from_value(value).unwrap();
@@ -105,7 +105,7 @@ impl ClientCSV {
 
 
 
-// create final Client struct according to desired output.
+/** Creates final Client struct according to desired output. */
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Client {
     pub id: ClientId,
@@ -132,7 +132,6 @@ pub struct Location2 {
     pub street: String,
     pub timezone: Timezone,
 }
-// clasification in regard to coordinates: special, labourious or normal.
 
 pub struct LocationCoordinates {
     pub minlon: f64,

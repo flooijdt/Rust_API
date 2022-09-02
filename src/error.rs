@@ -5,14 +5,14 @@ use warp::{
     Rejection, Reply,
 };
 
-/** Details possible problems deploying and operating the server. */
+/** Details possible errors deploying and operating the server. */
 #[derive(Debug)]
 pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     ClientNotFound,
 }
-/** Implements the Display trait to Error, thus allowing the custom errors to be printed. */
+/** Implements the Display trait to `Error`, thus allowing the custom errors to be printed. */
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {

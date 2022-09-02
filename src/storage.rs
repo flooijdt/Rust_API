@@ -6,16 +6,16 @@ use std::vec::Vec;
 use tokio::task;
 use reqwest::blocking::Client as ClientDl;
 use crate::client::{Dob, Location, Location2, LocationCoordinates, ClientId, Client, ClientCSV, Coordinates, ClientUnited, Timezone, Picture, Registered, Name};
-
+/** Creates a custom struct of type `storage`, to store all `Client`s data. */
 #[derive(Debug, Clone)]
 pub struct Storage { pub clients: Arc<RwLock<HashMap<ClientId, Client>>>}
-
+/** Implements the new function for creating and stanciating `Storage`s. */
 impl Storage {
     pub fn new() -> Self {
         Storage{ clients: Arc::new(RwLock::new(HashMap::new()))}
     }
 }
-
+/** Implements a funtion that gets the `Client`s data in the following adresses, temper them to save them according to the juntossomosmais-code-challenge default output, and returns them as a `Storage`. */
 pub async fn get_storage() -> Storage {
     let storage = Storage::new();
     // get Response containing user data from source.
@@ -31,24 +31,20 @@ pub async fn get_storage() -> Storage {
     }).await.unwrap();
 
 
-    // convert Response to json.
+    /* Converts Response to json. */
     let mut json: Value = serde_json::from_str(resp.as_str()).unwrap();
-    // create list with for Client structs.
+    /* Creates list with for Client structs. */
     let mut json_clients_list: Vec<ClientUnited> = Vec::new();
-
+    /* Converts input to intermediary ClientUnited struct for better tempering. */
     for object in json["results"].as_array_mut().iter() {
-        // println!("{:?}", &object);
         for objectling in object.iter() {
-            // println!("antes objectling");
-            // println!("{:?}", &objectling);
-            // println!("depois objectling");
             let client = ClientUnited::new(objectling.clone());
             json_clients_list.push(client);
         }
     }
 
     let mut json2  = csv::Reader::from_reader(resp2.as_bytes());
-    // convert ClientCSV to Client struct.
+    /* Converts ClientCSV to Client struct. */
     for result in json2.deserialize::<Vec<ClientCSV>>() {
         for result in result.unwrap() {
             let mut result: ClientUnited = ClientUnited {
@@ -89,10 +85,9 @@ pub async fn get_storage() -> Storage {
                     date: result.registered__date,
                 },
             };
-            // println!("{:#?}", &result);
             json_clients_list.push(result);
         }}
-    // create final Client struct according to desired output.
+    /* Create final Client struct according to desired output. */
     let special1 = LocationCoordinates {
         minlon: -2.196998,
         minlat: -46.361899,
@@ -115,7 +110,7 @@ pub async fn get_storage() -> Storage {
     };
 
     let mut id_counter = 0;
-
+    /* Parse all clients structs into the `Client` struct, aplying the juntossomosmais-code-challenge new/different fields. */
     for client in json_clients_list.iter() {        
         let client = client.clone();
         let mut client: Client = Client {
@@ -257,7 +252,7 @@ pub async fn get_storage() -> Storage {
         } else {
             client.r#type = String::from("labourious");
         }
-        // correct phone format.
+        /* Corrects phone format. */
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace("(", "");
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(")", "");
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace(" ", "");
@@ -265,7 +260,7 @@ pub async fn get_storage() -> Storage {
         let mut brcode: String = String::from("+55");
         brcode.push_str(client.telephoneNumbers[0].clone().as_str());
         client.telephoneNumbers[0] = brcode;
-        // correct mobile numbers.
+        /* Corrects mobile numbers. */
         client.mobileNumbers[0] = client.mobileNumbers[0].replace("(", "");
         client.mobileNumbers[0] = client.mobileNumbers[0].replace(")", "");
         client.mobileNumbers[0] = client.mobileNumbers[0].replace(" ", "");
@@ -276,12 +271,11 @@ pub async fn get_storage() -> Storage {
 
         client.id = ClientId(id_counter.to_string());
 
-        // println!("{:#?}", &client);
         storage.clients.write().await.insert(client.id.clone(), client);
 
         id_counter += 1;
     }
-
+    /* Returns storage. */
     storage
 }
 
