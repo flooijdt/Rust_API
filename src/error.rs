@@ -5,14 +5,14 @@ use warp::{
     Rejection, Reply,
 };
 
-/* Dealing with pagination errors */
+/** Details possible problems deploying and operating the server. */
 #[derive(Debug)]
 pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     ClientNotFound,
 }
-
+/** Implements the Display trait to Error, thus allowing the custom errors to be printed. */
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
@@ -24,7 +24,7 @@ impl std::fmt::Display for Error {
 }
 
 impl Reject for Error {}
-
+/** Returns the errors and status' code according to the error origin.  */
 pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     if let Some(error) = r.find::<Error>() {
         Ok(warp::reply::with_status(
