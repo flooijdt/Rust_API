@@ -13,6 +13,13 @@ The warp::path() function receives a String with the adress of the desired path,
 #[tokio::main]
 async fn main() {
     env_logger::init();
+
+    log::error!("this is an error!");
+    log::info!("this is an info!");
+    log::warn!("this is an warning!");
+
+
+
     /* Creates cors filter. */
     let cors = warp::cors()
         .allow_any_origin()
