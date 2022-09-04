@@ -17,3 +17,5 @@ tokio = {version = "*", features = ["full"]}
 warp = "*"
 futures = "*"
 csv2json = "*"
+log = "*"
+env_logger = "*"

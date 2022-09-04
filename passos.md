@@ -6,9 +6,9 @@
 [*] parse clients as struct;
 [*] convert csvs; 
 [*] convert required fields;
-[*] adicionar regiao do país
-[] Create API;
-[] create database;
-[] add pagination to API;
+[*] add country's region
+[*] Create API;
+[*] add pagination to API;
 [] change all unwrap functions to expect functions;
+[] add authentication;
 

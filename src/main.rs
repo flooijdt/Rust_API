@@ -12,6 +12,7 @@ The warp::path() function receives a String with the adress of the desired path,
 `warp` is a framework structured in special functions called `filters`. Each functionality is implemented through these `filters`. */
 #[tokio::main]
 async fn main() {
+    env_logger::init();
     /* Creates cors filter. */
     let cors = warp::cors()
         .allow_any_origin()
