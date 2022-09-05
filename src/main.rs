@@ -1,3 +1,4 @@
+use tracing::instrument;
 use warp::{Filter, http::Method, query};
 use tracing_subscriber::fmt::format::FmtSpan;
 mod client;

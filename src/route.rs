@@ -7,6 +7,7 @@ use crate::error::Error;
 use crate::storage::Storage;
 
 /** Implements GET function. */
+#[instrument]
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
     info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
