@@ -17,6 +17,6 @@ tokio = {version = "*", features = ["full"]}
 warp = "*"
 futures = "*"
 csv2json = "*"
-log = "*"
-log4rs = "*"
 uuid = { version = "*", features = ["v4"] }
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
