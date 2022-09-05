@@ -19,11 +19,14 @@ async fn main() {
     log::warn!("this is an warning!");
     /* Creates a log filter to log information to stderr */
     let log = warp::log::custom(|info| {
-        eprintln!(
-            "{} {} {}",
+        log::info!(
+            "{} {} {} {:#?} from {} with {:#?}",
             info.method(),
             info.path(),
             info.status(),
+            info.elapsed(),
+            info.remote_addr().unwrap(),
+            info.request_headers()
         );
     });
 
