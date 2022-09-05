@@ -15,9 +15,9 @@ The warp::path() function receives a String with the adress of the desired path,
 async fn main() {
     let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "juntos_rust=info,warp=error".to_owned());
 
-    log::error!("this is an error!");
-    log::info!("this is an info!");
-    log::warn!("this is an warning!");
+    // log::error!("this is an error!");
+    // log::info!("this is an info!");
+    // log::warn!("this is an warning!");
     /* Creates a log filter to log information to stderr */
     // let log = warp::log::custom(|info| {
     //     log::info!(
@@ -102,7 +102,7 @@ async fn main() {
         .and_then(delete_client);
 
     /* Creates route to be served by combining all previous `filters` plus the error management module. */
-    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(log).with(cors).with(warp::trace::request()).recover(return_error);
+    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).with(warp::trace::request()).recover(return_error);
 
     /* Starts server on the below designated port. */
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
