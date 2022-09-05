@@ -18,5 +18,5 @@ warp = "*"
 futures = "*"
 csv2json = "*"
 uuid = { version = "*", features = ["v4"] }
-tracing = { version = "0.1", features = ["log"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing = { version = "*", features = ["log"] }
+tracing-subscriber = { version = "*", features = ["env-filter"] }
