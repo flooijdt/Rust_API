@@ -35,12 +35,15 @@ async fn main() {
         .allow_any_origin()
         .allow_header("content-type")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
+    /* Create log filter to identify each request with a unique id */
+    let id_filter = warp::any().map(|| uuid::Uuid::new_v4().to_string());
 
     /* Gets `Clients` data from juntos server into the `storage` variable. */
     let storage = get_storage().await;
     /* Creates a `filter` for manipulating `storage`. */
     let storage_filter = warp::any().map(move || storage.clone());
     /* Creates a filter for managing `GET` Requests for `storage` data. */
+
     let get_clients = warp::get()
         /* Serves the `filter` at the "/clients" path. */
         .and(warp::path("clients"))
@@ -50,6 +53,7 @@ async fn main() {
         .and(query())
         /* Clones the `storage` so it doesn`t need to be "moved". */
         .and(storage_filter.clone())
+        .and(id_filter)
         .and_then(get_clients);
 
     /* Creates a `filter` for managing `POST` Requests. */
