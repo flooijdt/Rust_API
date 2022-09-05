@@ -7,14 +7,16 @@ use crate::storage::Storage;
 
 /** Implements GET function. */
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
-
+    log::info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
+        log::info!("Pagination set {:#?}", &pagination);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         let res = &res[pagination.start..pagination.end];
         return Ok(warp::reply::json(&res));
     } else {
+        log::info!("No Pagination used.");
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }
