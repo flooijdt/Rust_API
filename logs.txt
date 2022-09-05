@@ -1,0 +1,169 @@
+warning: unused manifest key: package.author
+warning: juntos_rust v0.1.0 (/home/flooijdt/Nextcloud/bin/Code/juntos_rust) ignoring invalid dependency `csv2json` which is missing a lib target
+warning: variable does not need to be mutable
+  --> src/storage.rs:50:17
+   |
+50 |             let mut result: ClientUnited = ClientUnited {
+   |                 ----^^^^^^
+   |                 |
+   |                 help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: unreachable statement
+  --> src/route.rs:48:5
+   |
+16 |         return Ok(warp::reply::json(&res));
+   |         ---------------------------------- any code following this expression is unreachable
+...
+48 |     let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+   |
+   = note: `#[warn(unreachable_code)]` on by default
+
+warning: variable does not need to be mutable
+ --> src/route.rs:9:59
+  |
+9 | pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
+  |                                                           ----^^^^^^^
+  |                                                           |
+  |                                                           help: remove this `mut`
+
+warning: associated function is never used: `new`
+   --> src/client.rs:100:12
+    |
+100 |     pub fn new(value: Value) -> Self {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: structure field `name__title` should have a snake case name
+  --> src/client.rs:76:9
+   |
+76 |     pub name__title: String,
+   |         ^^^^^^^^^^^ help: convert the identifier to snake case: `name_title`
+   |
+   = note: `#[warn(non_snake_case)]` on by default
+
+warning: structure field `name__first` should have a snake case name
+  --> src/client.rs:77:9
+   |
+77 |     pub name__first: String,
+   |         ^^^^^^^^^^^ help: convert the identifier to snake case: `name_first`
+
+warning: structure field `name__last` should have a snake case name
+  --> src/client.rs:78:9
+   |
+78 |     pub name__last: String,
+   |         ^^^^^^^^^^ help: convert the identifier to snake case: `name_last`
+
+warning: structure field `location__street` should have a snake case name
+  --> src/client.rs:79:9
+   |
+79 |     pub location__street: String,
+   |         ^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_street`
+
+warning: structure field `location__city` should have a snake case name
+  --> src/client.rs:80:9
+   |
+80 |     pub location__city: String,
+   |         ^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_city`
+
+warning: structure field `location__state` should have a snake case name
+  --> src/client.rs:81:9
+   |
+81 |     pub location__state: String,
+   |         ^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_state`
+
+warning: structure field `location__postcode` should have a snake case name
+  --> src/client.rs:82:9
+   |
+82 |     pub location__postcode: u32,
+   |         ^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_postcode`
+
+warning: structure field `location__coordinates__latitude` should have a snake case name
+  --> src/client.rs:83:9
+   |
+83 |     pub location__coordinates__latitude: f64,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_coordinates_latitude`
+
+warning: structure field `location__coordinates__longitude` should have a snake case name
+  --> src/client.rs:84:9
+   |
+84 |     pub location__coordinates__longitude: f64,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_coordinates_longitude`
+
+warning: structure field `location__timezone__offset` should have a snake case name
+  --> src/client.rs:85:9
+   |
+85 |     pub location__timezone__offset: String,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_timezone_offset`
+
+warning: structure field `location__timezone__description` should have a snake case name
+  --> src/client.rs:86:9
+   |
+86 |     pub location__timezone__description: String,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `location_timezone_description`
+
+warning: structure field `dob__date` should have a snake case name
+  --> src/client.rs:88:9
+   |
+88 |     pub dob__date: String,
+   |         ^^^^^^^^^ help: convert the identifier to snake case: `dob_date`
+
+warning: structure field `dob__age` should have a snake case name
+  --> src/client.rs:89:9
+   |
+89 |     pub dob__age: u32,
+   |         ^^^^^^^^ help: convert the identifier to snake case: `dob_age`
+
+warning: structure field `registered__date` should have a snake case name
+  --> src/client.rs:90:9
+   |
+90 |     pub registered__date: String,
+   |         ^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `registered_date`
+
+warning: structure field `registered__age` should have a snake case name
+  --> src/client.rs:91:9
+   |
+91 |     pub registered__age: u32,
+   |         ^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `registered_age`
+
+warning: structure field `picture__large` should have a snake case name
+  --> src/client.rs:94:9
+   |
+94 |     pub picture__large: String,
+   |         ^^^^^^^^^^^^^^ help: convert the identifier to snake case: `picture_large`
+
+warning: structure field `picture__medium` should have a snake case name
+  --> src/client.rs:95:9
+   |
+95 |     pub picture__medium: String,
+   |         ^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `picture_medium`
+
+warning: structure field `picture__thumbnail` should have a snake case name
+  --> src/client.rs:96:9
+   |
+96 |     pub picture__thumbnail: String,
+   |         ^^^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `picture_thumbnail`
+
+warning: structure field `telephoneNumbers` should have a snake case name
+   --> src/client.rs:119:9
+    |
+119 |     pub telephoneNumbers: Vec<String>,
+    |         ^^^^^^^^^^^^^^^^ help: convert the identifier to snake case: `telephone_numbers`
+
+warning: structure field `mobileNumbers` should have a snake case name
+   --> src/client.rs:120:9
+    |
+120 |     pub mobileNumbers: Vec<String>,
+    |         ^^^^^^^^^^^^^ help: convert the identifier to snake case: `mobile_numbers`
+
+warning: `juntos_rust` (bin "juntos_rust") generated 24 warnings
+    Finished dev [unoptimized + debuginfo] target(s) in 0.10s
+     Running `target/debug/juntos_rust`
+[2022-09-04T14:31:42Z ERROR juntos_rust] this is an error!
+[2022-09-04T14:31:42Z INFO  juntos_rust] this is an info!
+[2022-09-04T14:31:42Z WARN  juntos_rust] this is an warning!
+[2022-09-04T14:31:43Z INFO  warp::server] Server::run; addr=127.0.0.1:3030
+[2022-09-04T14:31:43Z INFO  warp::server] listening on http://127.0.0.1:3030

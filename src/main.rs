@@ -12,13 +12,20 @@ The warp::path() function receives a String with the adress of the desired path,
 `warp` is a framework structured in special functions called `filters`. Each functionality is implemented through these `filters`. */
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
 
     log::error!("this is an error!");
     log::info!("this is an info!");
     log::warn!("this is an warning!");
-
-
+    /* Creates a log filter to log information to stderr */
+    let log = warp::log::custom(|info| {
+        eprintln!(
+            "{} {} {}",
+            info.method(),
+            info.path(),
+            info.status(),
+        );
+    });
 
     /* Creates cors filter. */
     let cors = warp::cors()
@@ -71,7 +78,7 @@ async fn main() {
         .and_then(delete_client);
 
     /* Creates route to be served by combining all previous `filters` plus the error management module. */
-    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).recover(return_error);
+    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(log).with(cors).recover(return_error);
 
     /* Starts server on the below designated port. */
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
