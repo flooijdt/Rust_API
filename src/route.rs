@@ -1,22 +1,23 @@
 use std::vec::Vec;
 use warp::{Rejection, http::StatusCode};
 use std::collections::HashMap;
+use tracing::{instrument, info};
 use crate::client::{ClientId, Client};
 use crate::error::Error;
 use crate::storage::Storage;
 
 /** Implements GET function. */
-pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage, id: String) -> Result<warp::reply::Json, Rejection>{
-    log::info!("{} Start querying questions", id);
+pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
+    info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
-        log::info!("{} Pagination set {:#?}", id, &pagination);
+        info!(pagination = true);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         let res = &res[pagination.start..pagination.end];
         return Ok(warp::reply::json(&res));
     } else {
-        log::info!("{} No Pagination used.", id);
+        info!(pagination = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }

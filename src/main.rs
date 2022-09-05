@@ -63,10 +63,10 @@ async fn main() {
         .and(query())
         /* Clones the `storage` so it doesn`t need to be "moved". */
         .and(storage_filter.clone())
-        .and_then(get_clients);
+        .and_then(get_clients)
         .with(warp::trace(|info| {
             tracing::info_span!(
-                "get_questions request",
+                "get_clients request",
                 method = %info.method(),
                 path = %info.path(),
                 id = %uuid::Uuid::new_v4(),
