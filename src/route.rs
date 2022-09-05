@@ -6,17 +6,17 @@ use crate::error::Error;
 use crate::storage::Storage;
 
 /** Implements GET function. */
-pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
-    log::info!("Start querying questions");
+pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage, id: String) -> Result<warp::reply::Json, Rejection>{
+    log::info!("{} Start querying questions", id);
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
         let pagination = extract_pagination(params)?;
-        log::info!("Pagination set {:#?}", &pagination);
+        log::info!("{} Pagination set {:#?}", id, &pagination);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         let res = &res[pagination.start..pagination.end];
         return Ok(warp::reply::json(&res));
     } else {
-        log::info!("No Pagination used.");
+        log::info!("{} No Pagination used.", id);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }
