@@ -19,3 +19,4 @@ futures = "*"
 csv2json = "*"
 log = "*"
 log4rs = "*"
+uuid = { version = "*", features = ["v4"] }
