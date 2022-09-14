@@ -40,7 +40,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         //         _ =>,
         //     }
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-        let res = &res.;
+        let res = &res;
         return Ok(warp::reply::json(&res));
 
             
