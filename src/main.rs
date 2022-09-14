@@ -73,26 +73,26 @@ async fn main() {
                 id = %uuid::Uuid::new_v4(),
             )})
         );
-
-    let get_clients = warp::get()
-        /* Serves the `filter` at the "/clients" path. */
-        .and(warp::path("clients"))
-        /* Ends the path with a "/". */
-        .and(warp::path::end())
-        /* Receives pagination queries in the form of a `Hashmap<String>` via the up designated path. e.g. `/clients?start=3&end=56`. */
-        .and(query())
-        /* Clones the `storage` so it doesn`t need to be "moved". */
-        .and(storage_filter.clone())
-        .and_then(get_clients)
-        .with(warp::trace(|info| {
-            tracing::info_span!(
-                "get_clients request",
-                method = %info.method(),
-                path = %info.path(),
-                id = %uuid::Uuid::new_v4(),
-            )})
-        );
-
+    //
+    // let get_clients = warp::get()
+    //     /* Serves the `filter` at the "/clients" path. */
+    //     .and(warp::path("clients"))
+    //     /* Ends the path with a "/". */
+    //     .and(warp::path::end())
+    //     /* Receives pagination queries in the form of a `Hashmap<String>` via the up designated path. e.g. `/clients?start=3&end=56`. */
+    //     .and(query())
+    //     /* Clones the `storage` so it doesn`t need to be "moved". */
+    //     .and(storage_filter.clone())
+    //     .and_then(get_clients)
+    //     .with(warp::trace(|info| {
+    //         tracing::info_span!(
+    //             "get_clients request",
+    //             method = %info.method(),
+    //             path = %info.path(),
+    //             id = %uuid::Uuid::new_v4(),
+    //         )})
+    //     );
+    //
 
 
 
