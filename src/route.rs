@@ -30,25 +30,32 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
-        // if params.contains_key("region") && params.contains_key("type") {
-        //     match params.get("region") {
-        //         "sul" =>,
-        //         "sudeste" =>,
-        //         "centro-oeste" =>,
-        //         "nordeste" =>,
-        //         "norte" =>,
-        //         _ =>,
-        //     }
-        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-        let res = &res;
-        return Ok(warp::reply::json(&res));
+        let res = storage.clients.read().await;
+        let res = res.values().cloned();
 
+        let region = client.location.region;
+        let type = client.type;
+
+        let clients_vec = Vec::<Client>::new();
+
+        for client in res {
+            if params.type == type {
+                clients_vec.append(client);
+            }
+            let region = client.location.region;
+            let type = client.type;
             
-        }
-        let pagination = extract_pagination(params)?;
-        info!(pagination = true);
-        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-        let res = &res[pagination.start..pagination.end];
+    
+    
+            match client.location.region {
+                String::from("sul") => clients_vec.,
+                String::from("sudeste") => ,
+                String::from("centro-oeste") => ,
+                String::from("nordeste") => ,
+                String::from("norte") => ,
+                _,
+            }
+        } 
         return Ok(warp::reply::json(&res));
     } else {
         info!(params = false);
