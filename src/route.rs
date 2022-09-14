@@ -36,8 +36,8 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         let mut clients_vec = Vec::<Client>::new();
 
         for client in res {
-            let region = client.location.region.clone();
-            let r#type = client.r#type.clone();
+            let region: String = client.location.region.clone();
+            let r#type: String = client.r#type.clone();
 
             if params.get(&r#type).expect("could not get type.") == &r#type && params.get(&region).expect("could not get region.") == &region {
                 clients_vec.push(client.clone());
