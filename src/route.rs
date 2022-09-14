@@ -6,25 +6,25 @@ use crate::client::{ClientId, Client};
 use crate::error::Error;
 use crate::storage::{Storage, self};
 
+// pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
+//     println!("{:#?}", params);
+//     info!("Start querying questions");
+//     /* Applies pagination parameters provided by query. */
+//     if !params.is_empty() {
+//         let pagination = extract_pagination(params)?;
+//         info!(pagination = true);
+//         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
+//         let res = &res[pagination.start..pagination.end];
+//         return Ok(warp::reply::json(&res));
+//     } else {
+//         info!(pagination = false);
+//         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
+//         return Ok(warp::reply::json(&res));
+//     }
+
+
 /** Implements GET function. */
 #[instrument]
-pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
-    println!("{:#?}", params);
-    info!("Start querying questions");
-    /* Applies pagination parameters provided by query. */
-    if !params.is_empty() {
-        let pagination = extract_pagination(params)?;
-        info!(pagination = true);
-        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-        let res = &res[pagination.start..pagination.end];
-        return Ok(warp::reply::json(&res));
-    } else {
-        info!(pagination = false);
-        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-        return Ok(warp::reply::json(&res));
-    }
-
-
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
     println!("{:#?}", params);
     info!("Start querying questions");
@@ -33,30 +33,17 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         let res = storage.clients.read().await;
         let res = res.values().cloned();
 
-        let region = client.location.region;
-        let type = client.type;
-
-        let clients_vec = Vec::<Client>::new();
+        let mut clients_vec = Vec::<Client>::new();
 
         for client in res {
-            if params.type == type {
-                clients_vec.append(client);
+            let region = client.location.region.clone();
+            let r#type = client.r#type.clone();
+
+            if params.get(&r#type).expect("could not get type.") == &r#type && params.get(&region).expect("could not get region.") == &region {
+                clients_vec.push(client.clone());
             }
-            let region = client.location.region;
-            let type = client.type;
-            
-    
-    
-            match client.location.region {
-                String::from("sul") => clients_vec.,
-                String::from("sudeste") => ,
-                String::from("centro-oeste") => ,
-                String::from("nordeste") => ,
-                String::from("norte") => ,
-                _,
-            }
-        } 
-        return Ok(warp::reply::json(&res));
+        }
+        return Ok(warp::reply::json(&clients_vec));
     } else {
         info!(params = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
