@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use tracing::{instrument, info};
 use crate::client::{ClientId, Client};
 use crate::error::Error;
-use crate::storage::Storage;
+use crate::storage::{Storage, self};
 
 /** Implements GET function. */
 #[instrument]
@@ -30,15 +30,20 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
-        if params.contains_key("region") && params.contains_key("type") {
-            match params.get("region") {
-                "sul" =>,
-                "sudeste" =>,
-                "centro-oeste" =>,
-                "nordeste" =>,
-                "norte" =>,
-                _ =>,
-            }
+        // if params.contains_key("region") && params.contains_key("type") {
+        //     match params.get("region") {
+        //         "sul" =>,
+        //         "sudeste" =>,
+        //         "centro-oeste" =>,
+        //         "nordeste" =>,
+        //         "norte" =>,
+        //         _ =>,
+        //     }
+        let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
+        let res = &res.;
+        return Ok(warp::reply::json(&res));
+
+            
         }
         let pagination = extract_pagination(params)?;
         info!(pagination = true);
