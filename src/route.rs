@@ -30,7 +30,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     info!("Start querying questions");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
-        if params.contains_key("region") {
+        if params.contains_key("region") && params.contains_key("type") {
             match params.get("region") {
                 "sul" =>,
                 "sudeste" =>,
