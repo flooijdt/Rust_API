@@ -26,8 +26,8 @@ use crate::storage::{Storage, self};
 /** Implements GET function. */
 #[instrument]
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
-    println!("{:#?}", params);
-    info!("Start querying questions");
+    println!("{:#?}", params.get("type"));
+    info!("Start querying clients");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
         let res = storage.clients.read().await;
@@ -36,10 +36,10 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         let mut clients_vec = Vec::<Client>::new();
 
         for client in res {
-            let region: String = client.location.region.clone();
-            let r#type: String = client.r#type.clone();
+            let region = client.location.region.clone();
+            let r#type = client.r#type.clone();
 
-            if params.get(&r#type).expect("could not get type.") == &r#type && params.get(&region).expect("could not get region.") == &region {
+            if params.get("type").expect("could not get type.") == &r#type && params.get("region").expect("could not get region.") == &region {
                 clients_vec.push(client.clone());
             }
         }
