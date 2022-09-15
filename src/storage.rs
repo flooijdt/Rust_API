@@ -234,7 +234,7 @@ pub async fn get_storage() -> Storage {
         } else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
         && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat
         && normal.minlon
-        >= client
+        <= client
             .location
             .coordinates
             .longitude
