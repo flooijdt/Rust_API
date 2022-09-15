@@ -64,6 +64,7 @@ async fn main() {
         .and(query())
         /* Clones the `storage` so it doesn`t need to be "moved". */
         .and(storage_filter.clone())
+        .and(warp::body::json())
         .and_then(get_clients)
         .with(warp::trace(|info| {
             tracing::info_span!(
