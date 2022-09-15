@@ -38,7 +38,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         for client in clients_iter {
             let region = client.location.region.clone();
             let r#type = client.r#type.clone();
-            println!("{:?}", params.get("type").unwrap() == &client.r#type.clone());
+            println!("{:?}", /*params.get("type").unwrap() ==*/ &client.r#type.clone());
             if params.get("type").expect("could not get type.") == &r#type && params.get("region").expect("could not get region.") == &region {
                 println!("true 't was");
                 clients_vec.push(client.clone());

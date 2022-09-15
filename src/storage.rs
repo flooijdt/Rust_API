@@ -234,7 +234,7 @@ pub async fn get_storage() -> Storage {
         } else if normal.minlat <= client.location.coordinates.latitude.parse::<f64>().unwrap()
         && client.location.coordinates.latitude.parse::<f64>().unwrap() <= normal.maxlat
         && normal.minlon
-        <= client
+        >= client
             .location
             .coordinates
             .longitude
@@ -250,7 +250,7 @@ pub async fn get_storage() -> Storage {
         {
             client.r#type = String::from("normal");
         } else {
-            client.r#type = String::from("labourious");
+            client.r#type = String::from("laborious");
         }
         /* Corrects phone format. */
         client.telephoneNumbers[0] = client.telephoneNumbers[0].replace("(", "");
