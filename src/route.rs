@@ -24,6 +24,7 @@ use crate::storage::{Storage, self};
 
 
 /** Implements GET function. */
+// tenho que de algum modo avisar o usuário de que apenas os parametros type e region devem ser oferecidos e sao levados em consideracao
 #[instrument]
 pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
     // println!("{:#?}", params.get("type"));
