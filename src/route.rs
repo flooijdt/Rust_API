@@ -38,11 +38,15 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         for client in clients_iter {
             let region = client.location.region.clone();
             let r#type = client.r#type.clone();
+            println!("{:?}", r#type);
 
-            if params.get("type").expect("could not get type.") == &r#type && params.get("region").expect("could not get region.") == &region {
+
+            if (params.get("type").expect("could not get type.") == &r#type) && (params.get("region").expect("could not get region.") == &region) {
+                println!("true 't was");
                 clients_vec.push(client.clone());
             }
         }
+        println!("{:#?}", clients_vec);
         let res = clients_vec;
         return Ok(warp::reply::json(&res));
     } else {
