@@ -30,12 +30,12 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     info!("Start querying clients");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
-        let res = storage.clients.read().await;
-        let res = res.values().cloned();
+        let clients_iter = storage.clients.read().await;
+        let clients_iter = clients_iter.values().cloned();
 
         let mut clients_vec = Vec::<Client>::new();
 
-        for client in res {
+        for client in clients_iter {
             let region = client.location.region.clone();
             let r#type = client.r#type.clone();
 
@@ -43,7 +43,8 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
                 clients_vec.push(client.clone());
             }
         }
-        return Ok(warp::reply::json(&clients_vec));
+        let res = clients_vec;
+        return Ok(warp::reply::json(&res));
     } else {
         info!(params = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
