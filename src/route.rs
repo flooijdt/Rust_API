@@ -26,8 +26,8 @@ use crate::storage::{Storage, self};
 /** Implements GET function. */
 // tenho que de algum modo avisar o usuário de que apenas os parametros type e region devem ser oferecidos e sao levados em consideracao
 #[instrument]
-pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage, body: String) -> Result<warp::reply::Json, Rejection>{
-    println!("{:#?}", body);
+pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage, body: HashMap<String, String>) -> Result<warp::reply::Json, Rejection>{
+    println!("{:#?}", &body);
     info!("Start querying clients");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
