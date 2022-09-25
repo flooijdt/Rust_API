@@ -45,6 +45,9 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         }
         // println!("{:#?}", clients_vec);
         let res = clients_vec;
+        /* Pagination data */ 
+        let totalCount = res.len();
+
         return Ok(warp::reply::json(&res));
     } else {
         info!(params = false);
