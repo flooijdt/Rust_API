@@ -61,7 +61,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             warp_response.pageNumber = 1;
             warp_response.pageSize = warp_response.totalCount;
             
-            res.sort_by_key(|client| client.id.clone().to_string().parse::<usize>().expect("Could not convert to usize."));
+            res.sort_by_key(|client| client.id.clone().string.parse::<usize>().expect("Could not convert to usize."));
             warp_response.clients = res;
             
         }
@@ -118,7 +118,7 @@ pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::R
 }
 /** Implements the PUT function. */
 pub async fn update_client(id: String, storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.get_mut(&ClientId(id)) {
+    match storage.clients.write().await.get_mut(&ClientId{string: id}) {
         Some(c) => *c = client,
         None => return Err(warp::reject::custom(Error::ClientNotFound)),
     }
@@ -133,7 +133,7 @@ pub async fn delete_client(
     id: String,
     storage: Storage,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.remove(&ClientId(id)) {
+    match storage.clients.write().await.remove(&ClientId{string: id}) {
         Some(_) => Ok(warp::reply::with_status("Client deleted", StatusCode::OK)),
         None => Err(warp::reject::custom(Error::ClientNotFound)),
     }

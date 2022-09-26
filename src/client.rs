@@ -143,7 +143,7 @@ pub struct LocationCoordinates {
 
 
 #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub struct ClientId (pub String);
+pub struct ClientId {pub string: String}
 
 impl fmt::Display for ClientId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
