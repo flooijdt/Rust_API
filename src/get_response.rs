@@ -1,8 +1,8 @@
-mod client;
+use crate::client::{Client};
 
 pub struct GetResponse {
-    pageNumber: u32,
-    pageSize: u32,
-    totalCount: u32,
-    clients: Vec<Clients>,
+    pub pageNumber: usize,
+    pub pageSize: usize,
+    pub totalCount: usize,
+    pub clients: Vec<Client>,
   }

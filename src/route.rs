@@ -6,7 +6,7 @@ use tracing::{instrument, info};
 use crate::client::{ClientId, Client};
 use crate::error::Error;
 use crate::storage::{Storage, self};
-use crate::get_response::{GetResponse};
+use crate::get_response::{GetResponse, self};
 
 // pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
 //     println!("{:#?}", params);
@@ -48,9 +48,9 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         // println!("{:#?}", clients_vec);
         let res = clients_vec;
         /* Pagination data */ 
-        let response: Res
+        let warp_response: GetResponse;
 
-        let totalCount = res.len();
+        warp_response.totalCount = res.len();
 
         if totalCount >= 10 {
             let pageNumber: usize = 1;
