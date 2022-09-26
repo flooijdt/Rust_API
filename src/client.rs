@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
+use std::fmt;
 
 #[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Dob {
@@ -144,3 +145,8 @@ pub struct LocationCoordinates {
 #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub struct ClientId (pub String);
 
+impl fmt::Display for ClientId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", &self)
+    }
+}
