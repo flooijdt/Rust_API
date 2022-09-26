@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use serde::de::IntoDeserializer;
 use warp::http::response;
 use warp::{Rejection, http::StatusCode};
 use std::collections::HashMap;
@@ -46,19 +47,26 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             }
         }
         // println!("{:#?}", clients_vec);
-        let res = clients_vec;
+        let mut res = clients_vec;
         /* Pagination data */ 
-        let warp_response: GetResponse;
+        let mut warp_response = GetResponse::new();
 
         warp_response.totalCount = res.len();
 
-        if totalCount >= 10 {
-            let pageNumber: usize = 1;
-            let pageSize = totalCount;
-
+        if warp_response.totalCount <= 10 {
+            warp_response.pageNumber = 1;
+            warp_response.pageSize = warp_response.totalCount;
+            warp_response.clients = res;
+        } else if warp_response.totalCount > 10 {
+            warp_response.pageNumber = 1;
+            warp_response.pageSize = warp_response.totalCount;
+            
+            res.sort_by_key(|client| client.id.clone());
+            warp_response.clients = res;
+            
         }
 
-        return Ok(warp::reply::json(&res));
+        return Ok(warp::reply::json(&warp_response));
     } else {
         info!(params = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();

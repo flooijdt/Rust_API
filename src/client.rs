@@ -1,13 +1,13 @@
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Dob {
     pub age: u32,
     pub date: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Location {
     pub city: String,
     pub coordinates: Coordinates,
@@ -17,39 +17,39 @@ pub struct Location {
     pub timezone: Timezone,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Coordinates {
     pub latitude: String,
     pub longitude: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Timezone {
     pub description: String,
     pub offset: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Name {
     pub first: String,
     pub last: String,
     pub title: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Picture {
     pub large: String,
     pub medium: String,
     pub thumbnail: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Registered {
     pub age: u32,
     pub date: String,
 }
 /** Creates intermediary client struct for unifying the `CSV` date with the `JSON` data. */
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ClientUnited {
     pub cell: String,
     pub dob: Dob,
@@ -106,7 +106,7 @@ impl ClientCSV {
 
 
 /** Creates final Client struct according to desired output. */
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Client {
     pub id: ClientId,
     pub r#type: String,
@@ -122,7 +122,7 @@ pub struct Client {
     pub nationality: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Location2 {
     pub region: String,
     pub city: String,
@@ -141,6 +141,6 @@ pub struct LocationCoordinates {
 }
 
 
-#[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash)]
-pub struct ClientId (pub String);
+#[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash, PartialOrd, Ord)]
+pub struct ClientId (pub usize);
 
