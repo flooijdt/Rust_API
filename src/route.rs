@@ -61,7 +61,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             warp_response.pageNumber = 1;
             warp_response.pageSize = warp_response.totalCount;
             
-            res.sort_by_key(|client| client.id.clone().string.parse::<usize>().expect("Could not convert to usize."));
+            res.sort_by_key(|client| client.id.parse::<usize>().expect("Could not convert to usize."));
             warp_response.clients = res;
             
         }
@@ -109,7 +109,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
 }
 /** Implements the POST function. */
 pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
-    storage.clients.write().await.insert(client.id.clone(), client);
+    storage.clients.write().await.insert(ClientId{ string: client.id.clone()}, client);
 
     Ok(warp::reply::with_status(
         "Client added",

@@ -109,7 +109,7 @@ impl ClientCSV {
 /** Creates final Client struct according to desired output. */
 #[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Client {
-    pub id: ClientId,
+    pub id: String,
     pub r#type: String,
     pub gender: String,
     pub name: Name,

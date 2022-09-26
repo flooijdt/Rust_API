@@ -114,7 +114,7 @@ pub async fn get_storage() -> Storage {
     for client in json_clients_list.iter() {        
         let client = client.clone();
         let mut client: Client = Client {
-            id: ClientId{string: String::from("placeholder")},
+            id: String::from("placeholder"),
             r#type: String::from("placeholder"),
             gender: client.gender,
             name: Name {
@@ -269,9 +269,12 @@ pub async fn get_storage() -> Storage {
         brcode.push_str(client.mobileNumbers[0].clone().as_str());
         client.mobileNumbers[0] = brcode;
 
-        client.id = ClientId{string: id_counter.to_string()};
+        // client.id = ClientId{string: id_counter.to_string()};
 
-        storage.clients.write().await.insert(client.id.clone(), client);
+        let counter_id = ClientId{string: id_counter.to_string()};
+        client.id = counter_id.string;
+
+        storage.clients.write().await.insert(ClientId{string: client.id.clone()}, client);
 
         id_counter += 1;
     }
