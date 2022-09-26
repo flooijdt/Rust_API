@@ -1,6 +1,6 @@
 mod client;
 
-pub struct Response {
+pub struct GetResponse {
     pageNumber: u32,
     pageSize: u32,
     totalCount: u32,

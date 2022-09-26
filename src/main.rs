@@ -5,6 +5,7 @@ mod client;
 mod error;
 mod storage;
 mod route;
+mod get_response;
 use crate::error::return_error;
 use crate::storage::get_storage;
 use crate::route::{get_clients, update_client, add_client, delete_client};
