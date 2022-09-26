@@ -48,6 +48,12 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         /* Pagination data */ 
         let totalCount = res.len();
 
+        if totalCount >= 10 {
+            let pageNumber: u32 = 1;
+            let pageSize = totalCount;
+
+        }
+
         return Ok(warp::reply::json(&res));
     } else {
         info!(params = false);
