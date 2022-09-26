@@ -142,5 +142,5 @@ pub struct LocationCoordinates {
 
 
 #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub struct ClientId (pub usize);
+pub struct ClientId (pub String);
 
