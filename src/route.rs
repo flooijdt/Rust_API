@@ -1,35 +1,21 @@
-use std::vec::Vec;
-use serde::de::IntoDeserializer;
-use warp::http::response;
-use warp::{Rejection, http::StatusCode};
-use std::collections::HashMap;
-use tracing::{instrument, info};
-use crate::client::{ClientId, Client};
+use crate::client::{Client, ClientId};
 use crate::error::Error;
-use crate::storage::{Storage, self};
-use crate::get_response::{GetResponse, self};
-
-// pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
-//     println!("{:#?}", params);
-//     info!("Start querying questions");
-//     /* Applies pagination parameters provided by query. */
-//     if !params.is_empty() {
-//         let pagination = extract_pagination(params)?;
-//         info!(pagination = true);
-//         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-//         let res = &res[pagination.start..pagination.end];
-//         return Ok(warp::reply::json(&res));
-//     } else {
-//         info!(pagination = false);
-//         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
-//         return Ok(warp::reply::json(&res));
-//     }
-
+use crate::get_response::{self, GetResponse};
+use crate::storage::{self, Storage};
+use serde::de::IntoDeserializer;
+use std::collections::HashMap;
+use std::vec::Vec;
+use tracing::{info, instrument};
+use warp::http::response;
+use warp::{http::StatusCode, Rejection};
 
 /** Implements GET function. */
 // tenho que de algum modo avisar o usuário de que apenas os parametros type e region devem ser oferecidos e sao levados em consideração
 #[instrument]
-pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) -> Result<warp::reply::Json, Rejection>{
+pub async fn get_clients(
+    params: HashMap<String, String>,
+    mut storage: Storage,
+) -> Result<warp::reply::Json, Rejection> {
     info!("Start querying clients");
     /* Applies pagination parameters provided by query. */
     if !params.is_empty() {
@@ -42,13 +28,15 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             let region = client.location.region.clone();
             let r#type = client.r#type.clone();
             // println!("{:?}", /*params.get("type").unwrap() ==*/ &client.r#type.clone());
-            if params.get("type").expect("could not get type.") == &r#type && params.get("region").expect("could not get region.") == &region {
+            if params.get("type").expect("could not get type.") == &r#type
+                && params.get("region").expect("could not get region.") == &region
+            {
                 clients_vec.push(client.clone());
             }
         }
         // println!("{:#?}", clients_vec);
         let mut res = clients_vec;
-        /* Pagination data */ 
+        /* Pagination data */
         let mut warp_response = GetResponse::new();
 
         warp_response.totalCount = res.len();
@@ -61,21 +49,26 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             warp_response.pageNumber = 1;
 
             /* Sets the standard pageSize to 10. */
-            warp_response.pageSize = 10; 
+            warp_response.pageSize = 10;
 
             if warp_response.totalCount % 10 == 0 {
                 let total_pgs = warp_response.totalCount / 10;
-
-
             }
             let total_pgs = warp_response.totalCount / 10;
 
-            warp_response.pageSize = params.get("pageSize").expect("Could not get pageSize.").parse::<usize>().expect("Could not parse pageSize to usize.");
+            warp_response.pageSize = params
+                .get("pageSize")
+                .expect("Could not get pageSize.")
+                .parse::<usize>()
+                .expect("Could not parse pageSize to usize.");
 
-            
-            res.sort_by_key(|client| client.id.parse::<usize>().expect("Could not convert to usize."));
+            res.sort_by_key(|client| {
+                client
+                    .id
+                    .parse::<usize>()
+                    .expect("Could not convert to usize.")
+            });
             warp_response.clients = res;
-            
         }
 
         return Ok(warp::reply::json(&warp_response));
@@ -84,9 +77,6 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
         return Ok(warp::reply::json(&res));
     }
- 
-
-
 
     /** Creates a pagination struct in order to organize the incoming parameters. */
     #[derive(Debug)]
@@ -120,34 +110,49 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
     Ok(warp::reply::json(&res))
 }
 /** Implements the POST function. */
-pub async fn add_client(storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
-    storage.clients.write().await.insert(ClientId{ string: client.id.clone()}, client);
+pub async fn add_client(
+    storage: Storage,
+    client: Client,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    storage.clients.write().await.insert(
+        ClientId {
+            string: client.id.clone(),
+        },
+        client,
+    );
 
-    Ok(warp::reply::with_status(
-        "Client added",
-        StatusCode::OK,
-    ))
+    Ok(warp::reply::with_status("Client added", StatusCode::OK))
 }
 /** Implements the PUT function. */
-pub async fn update_client(id: String, storage: Storage, client: Client) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.get_mut(&ClientId{string: id}) {
+pub async fn update_client(
+    id: String,
+    storage: Storage,
+    client: Client,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match storage
+        .clients
+        .write()
+        .await
+        .get_mut(&ClientId { string: id })
+    {
         Some(c) => *c = client,
         None => return Err(warp::reject::custom(Error::ClientNotFound)),
     }
 
-    Ok(warp::reply::with_status(
-        "Client updated",
-        StatusCode::OK,
-    ))
+    Ok(warp::reply::with_status("Client updated", StatusCode::OK))
 }
 /** Implements the DELETE function. */
 pub async fn delete_client(
     id: String,
     storage: Storage,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage.clients.write().await.remove(&ClientId{string: id}) {
+    match storage
+        .clients
+        .write()
+        .await
+        .remove(&ClientId { string: id })
+    {
         Some(_) => Ok(warp::reply::with_status("Client deleted", StatusCode::OK)),
         None => Err(warp::reject::custom(Error::ClientNotFound)),
     }
 }
-
