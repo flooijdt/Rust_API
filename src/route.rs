@@ -59,7 +59,10 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
             warp_response.clients = res;
         } else if warp_response.totalCount > 10 {
             warp_response.pageNumber = 1;
-            warp_response.pageSize = warp_response.totalCount;
+
+            warp_response.pageSize = 10; 
+
+            warp_response.pageSize = params.get("pageSize").expect("Could not get pageSize.");
             
             res.sort_by_key(|client| client.id.parse::<usize>().expect("Could not convert to usize."));
             warp_response.clients = res;
