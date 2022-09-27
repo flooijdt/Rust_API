@@ -62,7 +62,7 @@ pub async fn get_clients(params: HashMap<String, String>, mut storage: Storage) 
 
             warp_response.pageSize = 10; 
 
-            warp_response.pageSize = params.get("pageSize").expect("Could not get pageSize.");
+            warp_response.pageSize = params.get("pageSize").expect("Could not get pageSize.").parse::<usize>().expect("Could not parse pageSize to usize.");
             
             res.sort_by_key(|client| client.id.parse::<usize>().expect("Could not convert to usize."));
             warp_response.clients = res;
