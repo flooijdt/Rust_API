@@ -52,17 +52,39 @@ pub async fn get_clients(
             /* Sets the default pageSize to 10. */
             warp_response.pageSize = 10;
 
-            warp_response.pageSize = params
-                .get("pageSize")
-                .expect("Could not get pageSize.")
-                .parse::<usize>()
-                .expect("Could not parse pageSize to usize.");
+            match params.get("pageSize") {
+                // The division was valid
+                Some(x) => {
+                    warp_response.pageSize = x
+                        .parse::<usize>()
+                        .expect("Could not parse pageSize to usize.")
+                }
+                // The division was invalid
+                None => warp_response.pageSize = 10,
+            }
 
-            warp_response.pageNumber = params
-                .get("pageNumber")
-                .expect("Could not get pageNumber.")
-                .parse::<usize>()
-                .expect("Could not parse pageNumber to usize.");
+            match params.get("pageNumber") {
+                // The division was valid
+                Some(x) => {
+                    warp_response.pageNumber = x
+                        .parse::<usize>()
+                        .expect("Could not parse pageNumber to usize.")
+                }
+                // The division was invalid
+                None => warp_response.pageNumber = 0,
+            }
+
+            // warp_response.pageSize = params
+            //     .get("pageSize")
+            //     .expect("Could not get pageSize.")
+            //     .parse::<usize>()
+            //     .expect("Could not parse pageSize to usize.");
+
+            // warp_response.pageNumber = params
+            //     .get("pageNumber")
+            //     .expect("Could not get pageNumber.")
+            //     .parse::<usize>()
+            //     .expect("Could not parse pageNumber to usize.");
 
             res.sort_by_key(|client| {
                 client
