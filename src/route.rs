@@ -69,7 +69,6 @@ pub async fn get_clients(
             } else {
                 let total_pgs = (warp_response.totalCount / warp_response.pageSize) + 1;
             }
-            let total_pgs = warp_response.totalCount / warp_response.pageSize;
 
             warp_response.clients = res;
         }
