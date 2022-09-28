@@ -53,6 +53,8 @@ pub async fn get_clients(
 
             if warp_response.totalCount % 10 == 0 {
                 let total_pgs = warp_response.totalCount / 10;
+            } else {
+                let total_pgs = (warp_response.totalCount / 10) + 1;
             }
             let total_pgs = warp_response.totalCount / 10;
 
