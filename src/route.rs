@@ -74,7 +74,7 @@ pub async fn get_clients(
             warp_response.clients = res;
         }
 
-        return Ok(warp::reply::json(&warp_response));
+        return Ok(warp::reply::json(&warp_response[0..warp_response.pageSize]));
     } else {
         info!(params = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
