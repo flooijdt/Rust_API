@@ -42,12 +42,12 @@ pub async fn get_clients(
         warp_response.totalCount = res.len();
 
         if warp_response.totalCount <= 10 {
-            warp_response.pageNumber = 1;
+            warp_response.pageNumber = 0;
             warp_response.pageSize = warp_response.totalCount;
             warp_response.clients = res;
         } else if warp_response.totalCount > 10 {
             /* Sets the default pageNumber to 1 */
-            warp_response.pageNumber = 1;
+            warp_response.pageNumber = 0;
 
             /* Sets the default pageSize to 10. */
             warp_response.pageSize = 10;
@@ -71,10 +71,12 @@ pub async fn get_clients(
                 let total_pgs = (warp_response.totalCount / warp_response.pageSize) + 1;
             }
 
-            warp_response.clients = res;
+            warp_response.clients = res[(warp_response.pageNumber * warp_response.pageSize)
+                ..((warp_response.pageNumber + 1) * warp_response.pageSize)]
+                .to_vec();
         }
 
-        return Ok(warp::reply::json(&warp_response[0..warp_response.pageSize]));
+        return Ok(warp::reply::json(&warp_response));
     } else {
         info!(params = false);
         let res: Vec<Client> = storage.clients.read().await.values().cloned().collect();
