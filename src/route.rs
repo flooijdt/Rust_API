@@ -51,12 +51,12 @@ pub async fn get_clients(
             /* Sets the standard pageSize to 10. */
             warp_response.pageSize = 10;
 
-            if warp_response.totalCount % 10 == 0 {
-                let total_pgs = warp_response.totalCount / 10;
+            if warp_response.totalCount % pageSize == 0 {
+                let total_pgs = warp_response.totalCount / pageSize;
             } else {
-                let total_pgs = (warp_response.totalCount / 10) + 1;
+                let total_pgs = (warp_response.totalCount / pageSize) + 1;
             }
-            let total_pgs = warp_response.totalCount / 10;
+            let total_pgs = warp_response.totalCount / pageSize;
 
             warp_response.pageSize = params
                 .get("pageSize")
@@ -70,6 +70,14 @@ pub async fn get_clients(
                     .parse::<usize>()
                     .expect("Could not convert to usize.")
             });
+
+            if warp_response.totalCount % pageSize == 0 {
+                let total_pgs = warp_response.totalCount / pageSize;
+            } else {
+                let total_pgs = (warp_response.totalCount / pageSize) + 1;
+            }
+            let total_pgs = warp_response.totalCount / pageSize;
+
             warp_response.clients = res;
         }
 
