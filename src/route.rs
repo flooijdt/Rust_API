@@ -46,9 +46,10 @@ pub async fn get_clients(
             warp_response.pageSize = warp_response.totalCount;
             warp_response.clients = res;
         } else if warp_response.totalCount > 10 {
+            /* Sets the default pageNumber to 1 */
             warp_response.pageNumber = 1;
 
-            /* Sets the standard pageSize to 10. */
+            /* Sets the default pageSize to 10. */
             warp_response.pageSize = 10;
 
             warp_response.pageSize = params
