@@ -99,9 +99,14 @@ pub async fn get_clients(
                 let total_pgs = (warp_response.totalCount / warp_response.pageSize) + 1;
             }
 
-            warp_response.clients = res[(warp_response.pageNumber * warp_response.pageSize)
-                ..((warp_response.pageNumber + 1) * warp_response.pageSize)]
-                .to_vec();
+            let last_n_index = ((warp_response.pageNumber + 1) * warp_response.pageSize);
+
+            if last_n_index < warp_response.totalCount {
+                last_n_index = warp_response.totalCount;
+            }
+
+            warp_response.clients =
+                res[(warp_response.pageNumber * warp_response.pageSize)..last_n_index].to_vec();
         }
 
         return Ok(warp::reply::json(&warp_response));
