@@ -58,6 +58,12 @@ pub async fn get_clients(
                 .parse::<usize>()
                 .expect("Could not parse pageSize to usize.");
 
+            warp_response.pageNumber = params
+                .get("pageNumber")
+                .expect("Could not get pageNumber.")
+                .parse::<usize>()
+                .expect("Could not parse pageNumber to usize.");
+
             res.sort_by_key(|client| {
                 client
                     .id
