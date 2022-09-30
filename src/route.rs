@@ -93,12 +93,6 @@ pub async fn get_clients(
                     .expect("Could not convert to usize.")
             });
 
-            if warp_response.totalCount % warp_response.pageSize == 0 {
-                let total_pgs = warp_response.totalCount / warp_response.pageSize;
-            } else {
-                let total_pgs = (warp_response.totalCount / warp_response.pageSize) + 1;
-            }
-
             let mut last_n_index = (warp_response.pageNumber + 1) * warp_response.pageSize;
 
             if last_n_index > warp_response.totalCount {
