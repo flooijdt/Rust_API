@@ -17,7 +17,7 @@ pub async fn get_clients(
     mut storage: Storage,
 ) -> Result<warp::reply::Json, Rejection> {
     info!("Start querying clients");
-    /* Applies pagination parameters provided by query. */
+    /* Obtains clients' storage iterator */
     if !params.is_empty() {
         let clients_iter = storage.clients.read().await;
         let clients_iter = clients_iter.values().cloned();
