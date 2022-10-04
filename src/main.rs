@@ -121,9 +121,9 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(delete_client);
 
-    let get_clients = warp::get()
+    let get_account = warp::get()
         /* Serves the `filter` at the "/clients" path. */
-        .and(warp::path("clients"))
+        .and(warp::path("auth"))
         /* Ends the path with a "/". */
         .and(warp::path::end())
         /* Receives pagination queries in the form of a `Hashmap<String>` via the up designated path. e.g. `/clients?start=3&end=56`. */
