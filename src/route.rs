@@ -196,6 +196,16 @@ pub async fn add_account(
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let queried_account = storage.accounts.read().await.values().cloned().collect();
 
+    match storage
+        .accounts
+        .write()
+        .await
+        .get_mut(&AccountId(account.id))
+    {
+        Some(c) => *c = client,
+        None => return Err(warp::reject::custom(Error::ClientNotFound)),
+    }
+
 }
     
 
