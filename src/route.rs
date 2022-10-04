@@ -1,3 +1,4 @@
+use crate::account::{Account, AccountId, Accounts};
 use crate::client::{Client, ClientId};
 use crate::error::Error;
 use crate::get_response::{self, GetResponse};
@@ -187,4 +188,22 @@ pub async fn delete_client(
         Some(_) => Ok(warp::reply::with_status("Client deleted", StatusCode::OK)),
         None => Err(warp::reject::custom(Error::ClientNotFound)),
     }
+}
+/** Implements the POST function. */
+pub async fn add_account(
+    storage: Accounts,
+    account: Account,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let queried_account = storage.accounts.read().await.values().cloned().collect();
+
+}
+    
+
+    storage
+        .accounts
+        .write()
+        .await
+        .insert(AccountId(account.id.clone()));
+
+    Ok(warp::reply::with_status("Client added", StatusCode::OK))
 }

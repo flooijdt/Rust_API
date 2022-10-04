@@ -1,6 +1,7 @@
 use tracing::instrument;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, query, Filter};
+mod account;
 mod client;
 mod error;
 mod get_response;
@@ -120,7 +121,6 @@ async fn main() {
         .and(warp::path::end())
         .and(storage_filter.clone())
         .and_then(delete_client);
-
 
     /* Creates route to be served by combining all previous `filters` plus the error management module. */
     let routes = get_clients
