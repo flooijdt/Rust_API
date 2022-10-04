@@ -1,21 +1,22 @@
 use tracing::instrument;
-use warp::{Filter, http::Method, query};
 use tracing_subscriber::fmt::format::FmtSpan;
+use warp::{http::Method, query, Filter};
 mod client;
 mod error;
-mod storage;
-mod route;
 mod get_response;
+mod route;
+mod storage;
 use crate::error::return_error;
+use crate::route::{add_client, delete_client, get_clients, update_client};
 use crate::storage::get_storage;
-use crate::route::{get_clients, update_client, add_client, delete_client};
 
 /** Starts a server via the warp::serve() function on the designated port, currently: `localhost/3030`;
 The warp::path() function receives a String with the adress of the desired path, currently: `/clients`.
 `warp` is a framework structured in special functions called `filters`. Each functionality is implemented through these `filters`. */
 #[tokio::main]
 async fn main() {
-    let log_filter = std::env::var("RUST_LOG").unwrap_or_else(|_| "juntos_rust=info,warp=error".to_owned());
+    let log_filter =
+        std::env::var("RUST_LOG").unwrap_or_else(|_| "juntos_rust=info,warp=error".to_owned());
 
     // log::error!("this is an error!");
     // log::info!("this is an info!");
@@ -40,9 +41,6 @@ async fn main() {
         // routes' durations!
         .with_span_events(FmtSpan::CLOSE)
         .init();
-
-
-
 
     /* Creates cors filter. */
     let cors = warp::cors()
@@ -96,8 +94,6 @@ async fn main() {
     //     );
     //
 
-
-
     /* Creates a `filter` for managing `POST` Requests. */
     let add_client = warp::post()
         .and(warp::path("clients"))
@@ -106,7 +102,6 @@ async fn main() {
         /* Receives th Client to be added in json. */
         .and(warp::body::json())
         .and_then(add_client);
-
 
     /* Creates a `filter` for managing `PUT` Requests. */
     let update_client = warp::put()
@@ -126,10 +121,35 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(delete_client);
 
+    let get_clients = warp::get()
+        /* Serves the `filter` at the "/clients" path. */
+        .and(warp::path("clients"))
+        /* Ends the path with a "/". */
+        .and(warp::path::end())
+        /* Receives pagination queries in the form of a `Hashmap<String>` via the up designated path. e.g. `/clients?start=3&end=56`. */
+        .and(query())
+        /* Clones the `storage` so it doesn`t need to be "moved". */
+        .and(storage_filter.clone())
+        // .and(warp::body::json())
+        .and_then(get_clients)
+        .with(warp::trace(|info| {
+            tracing::info_span!(
+                "get_clients request",
+                method = %info.method(),
+                path = %info.path(),
+                id = %uuid::Uuid::new_v4(),
+            )})
+        );
+
     /* Creates route to be served by combining all previous `filters` plus the error management module. */
-    let routes = get_clients.or(update_client).or(add_client).or(delete_client).with(cors).with(warp::trace::request()).recover(return_error);
+    let routes = get_clients
+        .or(update_client)
+        .or(add_client)
+        .or(delete_client)
+        .with(cors)
+        .with(warp::trace::request())
+        .recover(return_error);
 
     /* Starts server on the below designated port. */
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
-
