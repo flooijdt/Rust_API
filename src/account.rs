@@ -1,12 +1,21 @@
 #[derive(Debug, Clone)]
 pub struct Accounts {
-    pub clients: Arc<RwLock<HashMap<ClientId, Client>>>,
+    pub accounts: Arc<RwLock<HashMap<Account_id, Account>>>,
 }
+
+pub struct Account {
+    id: Option<Account_id>,
+    email: String,
+    password: String,
+}
+
+pub struct Account_id(pub i32);
+
 /** Implements the new function for creating and stanciating `Storage`s. */
-impl Storage {
+impl Accounts {
     pub fn new() -> Self {
-        Storage {
-            clients: Arc::new(RwLock::new(HashMap::new())),
+        Accounts {
+            accounts: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 }
