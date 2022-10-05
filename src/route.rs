@@ -194,27 +194,21 @@ pub async fn add_account(
     storage: Accounts,
     account: Account,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match storage
+    let account_given = storage
         .accounts
         .write()
         .await
         .get_mut(&account.id.clone().expect("Could not get requested id."))
-    {
+        .cloned();
+
+    match account_given {
         Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
         None => {
-            storage
-                .accounts
-                .write()
-                .await
-                .insert(
-                    account
-                        .id
-                        .as_ref()
-                        .expect("Could not insert id in storage.")
-                        .clone(),
-                    account.clone(),
-                )
-                .expect("Could not register account id and account.");
+            storage.accounts.write().await.insert(
+                account.id.clone().expect("Could not insert id in storage."),
+                account.clone(),
+            );
+            // .expect("Could not register account id and account.");
             Ok(warp::reply::with_status("Account added.", StatusCode::OK))
         }
     }
