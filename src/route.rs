@@ -189,3 +189,27 @@ pub async fn delete_client(
         None => Err(warp::reject::custom(Error::ClientNotFound)),
     }
 }
+/** Implements the POST function. */
+pub async fn add_account(
+    storage: Accounts,
+    account: Account,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let account_given = storage
+        .accounts
+        .write()
+        .await
+        .get_mut(&account.id.clone().expect("Could not get requested id."))
+        .cloned();
+
+    match account_given {
+        Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
+        None => {
+            storage.accounts.write().await.insert(
+                account.id.clone().expect("Could not insert id in storage."),
+                account.clone(),
+            );
+            // .expect("Could not register account id and account.");
+            Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+        }
+    }
+}
