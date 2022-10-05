@@ -1,6 +1,5 @@
 use account::get_accounts;
 use route::add_account;
-use tracing::instrument;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, query, Filter};
 mod account;
