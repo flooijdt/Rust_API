@@ -20,3 +20,5 @@ csv2json = "*"
 uuid = { version = "*", features = ["v4"] }
 tracing = { version = "*", features = ["log"] }
 tracing-subscriber = { version = "*", features = ["env-filter"] }
+rand = "*"
+rust-argon2 = "*"
