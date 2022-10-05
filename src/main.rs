@@ -131,7 +131,7 @@ async fn main() {
 
     /* Creates a `filter` for managing `POST` Requests. */
     let add_account = warp::post()
-        .and(warp::path("register"))
+        .and(warp::path("registration"))
         .and(warp::path::end())
         .and(accounts_filter.clone())
         /* Receives the Account to be added in json. */
