@@ -194,15 +194,16 @@ pub async fn add_account(
     storage: Accounts,
     account: Account,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let queried_account = storage.accounts.read().await.values().cloned().collect();
-
     match storage
         .accounts
         .write()
         .await
-        .get_mut(&AccountId(account.id))
+        .get_mut(&account.id.expect("Could not get requested id."))
     {
         Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
-        None => return Err(warp::reject::custom(Error::ClientNotFound)),
+        None => storage.accounts.write().await.insert(
+        account
+    );
+    Ok(),
     }
 }
