@@ -202,18 +202,7 @@ pub async fn add_account(
         .await
         .get_mut(&AccountId(account.id))
     {
-        Some(c) => *c = client,
+        Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
         None => return Err(warp::reject::custom(Error::ClientNotFound)),
     }
-
-}
-    
-
-    storage
-        .accounts
-        .write()
-        .await
-        .insert(AccountId(account.id.clone()));
-
-    Ok(warp::reply::with_status("Client added", StatusCode::OK))
 }
