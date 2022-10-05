@@ -1,4 +1,4 @@
-use account::get_accounts;
+use account::{add, add_account, get_accounts};
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, query, Filter};
 mod account;
