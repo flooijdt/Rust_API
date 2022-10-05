@@ -1,4 +1,6 @@
 use crate::error::Error;
+use argon2::{self, Config};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -38,6 +40,8 @@ pub async fn add_account(
     storage: Accounts,
     account: Account,
 ) -> Result<impl warp::Reply, warp::Rejection> {
+    let hashed_password = hash(account.password.as_bytes());
+
     let account_given = storage
         .accounts
         .write()
@@ -56,4 +60,10 @@ pub async fn add_account(
             Ok(warp::reply::with_status("Account added.", StatusCode::OK))
         }
     }
+}
+
+pub fn hash(password: &[u8]) -> String {
+    let salt = rand::thread_rng().gen::<[u8; 32]>();
+    let config = Config::default();
+    argon2::hash_encoded(password, &salt, &config).unwrap()
 }
