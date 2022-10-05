@@ -1,3 +1,5 @@
+use account::get_accounts;
+use route::add_account;
 use tracing::instrument;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, query, Filter};
@@ -54,6 +56,11 @@ async fn main() {
     /* Creates a `filter` for manipulating `storage`. */
     let storage_filter = warp::any().map(move || storage.clone());
     /* Creates a filter for managing `GET` Requests for `storage` data. */
+
+    /* Gets `Clients` data from juntos server into the `storage` variable. */
+    let accounts = get_accounts().await;
+    /* Creates a `filter` for manipulating `accounts`. */
+    let accounts_filter = warp::any().map(move || accounts.clone());
 
     let get_clients = warp::get()
         /* Serves the `filter` at the "/clients" path. */
@@ -122,11 +129,21 @@ async fn main() {
         .and(storage_filter.clone())
         .and_then(delete_client);
 
+    /* Creates a `filter` for managing `POST` Requests. */
+    let add_account = warp::post()
+        .and(warp::path("register"))
+        .and(warp::path::end())
+        .and(accounts_filter.clone())
+        /* Receives the Account to be added in json. */
+        .and(warp::body::json())
+        .and_then(add_account);
+
     /* Creates route to be served by combining all previous `filters` plus the error management module. */
     let routes = get_clients
         .or(update_client)
         .or(add_client)
         .or(delete_client)
+        .or(add_account)
         .with(cors)
         .with(warp::trace::request())
         .recover(return_error);

@@ -198,12 +198,24 @@ pub async fn add_account(
         .accounts
         .write()
         .await
-        .get_mut(&account.id.expect("Could not get requested id."))
+        .get_mut(&account.id.clone().expect("Could not get requested id."))
     {
         Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
-        None => storage.accounts.write().await.insert(
-        account
-    );
-    Ok(),
+        None => {
+            storage
+                .accounts
+                .write()
+                .await
+                .insert(
+                    account
+                        .id
+                        .as_ref()
+                        .expect("Could not insert id in storage.")
+                        .clone(),
+                    account.clone(),
+                )
+                .expect("Could not register account id and account.");
+            Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+        }
     }
 }

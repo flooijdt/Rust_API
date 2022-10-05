@@ -26,3 +26,8 @@ impl Accounts {
         }
     }
 }
+
+pub async fn get_accounts() -> Accounts {
+    let accounts = Accounts::new();
+    accounts
+}
