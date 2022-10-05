@@ -40,7 +40,8 @@ pub async fn add_account(
     storage: Accounts,
     account: Account,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    let hashed_password = hash(account.password.as_bytes());
+    /* Hash and salt password before storing it. */
+    hash(account.password.as_bytes());
 
     let account_given = storage
         .accounts
