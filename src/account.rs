@@ -52,9 +52,6 @@ pub async fn add_account(
     match account_given {
         Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
         None => {
-            if account_given.clone().unwrap().email == account.email {
-                return Err(warp::reject::custom(Error::AccountAlreadyExist));
-            };
             storage.accounts.write().await.insert(
                 account.id.clone().expect("Could not insert id in storage."),
                 account.clone(),
