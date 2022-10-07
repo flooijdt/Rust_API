@@ -34,6 +34,7 @@ impl Accounts {
 pub async fn get_accounts() -> Accounts {
     Accounts::new()
 }
+
 /** Implements the POST function. */
 pub async fn add_account(
     storage: Accounts,
@@ -56,7 +57,7 @@ pub async fn add_account(
     }
     /* returns error if id is already used or adds account if not. */
     match account_given {
-        Some(_) => Err(warp::reject::custom(Error::AccountAlreadyExist)),
+        Some(_) => Err(warp::reject::custom(Error::AccountIdAlreadyExist)),
         None => {
             storage.accounts.write().await.insert(
                 account.id.clone().expect("Could not insert id in storage."),

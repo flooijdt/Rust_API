@@ -11,16 +11,18 @@ pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     ClientNotFound,
+    AccountIdAlreadyExist,
     AccountAlreadyExist,
 }
 /** Implements the Display trait to `Error`, thus allowing the custom errors to be printed. */
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
-            Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}", err),
-            Error::MissingParameters => write!(f, "Missing parameter"),
-            Error::ClientNotFound => write!(f, "Client not found"),
-            Error::AccountAlreadyExist => write!(f, "Account already exists"),
+            Error::ParseError(ref err) => write!(f, "Cannot parse parameter: {}.", err),
+            Error::MissingParameters => write!(f, "Missing parameter."),
+            Error::ClientNotFound => write!(f, "Client not found."),
+            Error::AccountIdAlreadyExist => write!(f, "Account with same Id already exists."),
+            Error::AccountAlreadyExist => write!(f, "Account with same email already exists."),
         }
     }
 }
