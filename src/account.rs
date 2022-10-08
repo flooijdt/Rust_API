@@ -74,6 +74,7 @@ pub async fn add_account(
         // acc.0 = &AccountId(acc_counter).clone();
     }
 
+    println! {"{:?}", storage};
     Ok(warp::reply::with_status("Account added.", StatusCode::OK))
 }
 
