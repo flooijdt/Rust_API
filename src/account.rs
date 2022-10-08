@@ -70,7 +70,6 @@ pub async fn add_account(
             )
             .expect("Could not insert Account into storage.");
         // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
-        // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
 
         // acc.0 = &AccountId(acc_counter).clone();
     }
