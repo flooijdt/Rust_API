@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use warp::{http::StatusCode, Rejection};
-
+/* Creates Accounts (storage) struct as Arc for async use. */
 #[derive(Debug, Clone)]
 pub struct Accounts {
     pub accounts: Arc<RwLock<HashMap<AccountId, Account>>>,
