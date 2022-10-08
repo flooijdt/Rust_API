@@ -52,12 +52,14 @@ pub async fn add_account(
     let mut acc_counter = 1;
     /* Returns Error if it finds same email. */
     if storage.accounts.read().await.len() == 0 {
+        account.id = Some(AccountId(1));
         storage
             .accounts
             .write()
             .await
             .insert(AccountId(1), account.clone())
             .expect("Could not insert Account into storage.");
+        return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
     } else {
         for mut acc in storage.accounts.read().await.clone().iter_mut() {
             if acc.1.email == account.email {
@@ -78,13 +80,11 @@ pub async fn add_account(
                 )
                 .expect("Could not insert Account into storage.");
             println!("iterating");
-            // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
-
-            // acc.0 = &AccountId(acc_counter).clone();
         }
+
+        Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+        // acc.0 = &AccountId(acc_counter).clone();
     }
-    println! {"{:#?}", storage.accounts.read().await.len()};
-    Ok(warp::reply::with_status("Account added.", StatusCode::OK))
 }
 
 pub fn hash(password: &[u8]) -> String {
