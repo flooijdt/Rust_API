@@ -38,7 +38,7 @@ pub async fn get_accounts() -> Accounts {
 /** Implements the POST function. */
 pub async fn add_account(
     storage: Accounts,
-    account: Account,
+    mut account: Account,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     /* Hash and salt password before storing it. */
     hash(account.password.as_bytes());
@@ -57,14 +57,24 @@ pub async fn add_account(
         }
         acc_counter += 1;
         account.id = Some(AccountId(acc_counter).clone()).clone();
-        storage.accounts.write().await.insert(
-            account.id.expect("Could not insert id into storage."),
-            account.clone(),
-        );
-        return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
+        storage
+            .accounts
+            .write()
+            .await
+            .insert(
+                account
+                    .clone()
+                    .id
+                    .expect("Could not insert id into storage."),
+                account.clone(),
+            )
+            .expect("Could not insert Account into storage.");
+        // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
 
         // acc.0 = &AccountId(acc_counter).clone();
     }
+
+    Ok(warp::reply::with_status("Account added.", StatusCode::OK))
 }
 
 pub fn hash(password: &[u8]) -> String {
