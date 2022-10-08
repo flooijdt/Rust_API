@@ -51,30 +51,38 @@ pub async fn add_account(
     //     .cloned();
     let mut acc_counter = 1;
     /* Returns Error if it finds same email. */
-    for mut acc in storage.accounts.read().await.clone().iter_mut() {
-        if acc.1.email == account.email {
-            return Err(warp::reject::custom(Error::AccountAlreadyExist));
-        }
-        acc_counter += 1;
-        account.id = Some(AccountId(acc_counter).clone()).clone();
+    if storage.accounts.read().await.len() == 0 {
         storage
             .accounts
             .write()
             .await
-            .insert(
-                account
-                    .clone()
-                    .id
-                    .expect("Could not insert id into storage."),
-                account.clone(),
-            )
+            .insert(AccountId(1), account.clone())
             .expect("Could not insert Account into storage.");
-        println!("iterating");
-        // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
+    } else {
+        for mut acc in storage.accounts.read().await.clone().iter_mut() {
+            if acc.1.email == account.email {
+                return Err(warp::reject::custom(Error::AccountAlreadyExist));
+            }
+            acc_counter += 1;
+            account.id = Some(AccountId(acc_counter).clone()).clone();
+            storage
+                .accounts
+                .write()
+                .await
+                .insert(
+                    account
+                        .clone()
+                        .id
+                        .expect("Could not insert id into storage."),
+                    account.clone(),
+                )
+                .expect("Could not insert Account into storage.");
+            println!("iterating");
+            // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
 
-        // acc.0 = &AccountId(acc_counter).clone();
+            // acc.0 = &AccountId(acc_counter).clone();
+        }
     }
-
     println! {"{:#?}", storage.accounts.read().await.len()};
     Ok(warp::reply::with_status("Account added.", StatusCode::OK))
 }
