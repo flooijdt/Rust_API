@@ -11,4 +11,6 @@
 [*] add pagination to API;
 [] change all unwrap functions to expect functions;
 [] add authentication;
+[] transform add account function so it aplies the id itself,
+instead of obtaining it by the user;
 
