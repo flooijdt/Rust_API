@@ -70,11 +70,23 @@ pub async fn add_account(
             )
             .expect("Could not insert Account into storage.");
         // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
+        // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
 
         // acc.0 = &AccountId(acc_counter).clone();
     }
-
-    Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+    if storage
+        .accounts
+        .read()
+        .await
+        .clone()
+        .iter()
+        .any(|acc| acc == (&account.clone().id.unwrap(), &account.clone()))
+    {
+        Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+    } else {
+        println!("é no else merm.");
+        Err(warp::reject::custom(Error::AccountAlreadyExist))
+    }
 }
 
 pub fn hash(password: &[u8]) -> String {
