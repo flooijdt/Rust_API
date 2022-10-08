@@ -72,5 +72,5 @@ pub async fn add_account(
 pub fn hash(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
-    argon2::hash_encoded(password, &salt, &config).unwrap()
+    argon2::hash_encoded(password, &salt, &config).expect("Could not hash password.")
 }
