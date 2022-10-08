@@ -69,12 +69,13 @@ pub async fn add_account(
                 account.clone(),
             )
             .expect("Could not insert Account into storage.");
+        println!("iterating");
         // return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
 
         // acc.0 = &AccountId(acc_counter).clone();
     }
 
-    println! {"{:#?}", storage.accounts};
+    println! {"{:#?}", storage.accounts.read().await.len()};
     Ok(warp::reply::with_status("Account added.", StatusCode::OK))
 }
 
