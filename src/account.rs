@@ -57,29 +57,28 @@ pub async fn add_account(
             .accounts
             .write()
             .await
-            .insert(AccountId(1), account.clone())
-            .expect("Could not insert Account into storage.");
+            .insert(AccountId(1), account.clone());
+        // .expect("Could not insert Account into storage1.");
         return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
     } else {
         for mut acc in storage.accounts.read().await.clone().iter_mut() {
             if acc.1.email == account.email {
+                println!("pelo menos neh");
+                println!("{:#?}", storage.accounts.read().await.len());
                 return Err(warp::reject::custom(Error::AccountAlreadyExist));
-            }
-            acc_counter += 1;
-            account.id = Some(AccountId(acc_counter).clone()).clone();
-            storage
-                .accounts
-                .write()
-                .await
-                .insert(
+            } else {
+                acc_counter += 1;
+                account.id = Some(AccountId(acc_counter).clone()).clone();
+                storage.accounts.write().await.insert(
                     account
                         .clone()
                         .id
                         .expect("Could not insert id into storage."),
                     account.clone(),
-                )
-                .expect("Could not insert Account into storage.");
-            println!("iterating");
+                );
+                // .expect("Could not insert Account into storage2.");
+                println!("iterating");
+            }
         }
 
         Ok(warp::reply::with_status("Account added.", StatusCode::OK))
