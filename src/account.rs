@@ -49,7 +49,6 @@ pub async fn add_account(
     //     .await
     //     .get_mut(&account.id.clone().expect("Could not get requested id."))
     //     .cloned();
-    let mut acc_counter = 1;
     /* Returns Error if it finds same email. */
     if storage.accounts.read().await.len() == 0 {
         account.id = Some(AccountId(1));
@@ -71,6 +70,8 @@ pub async fn add_account(
                 let acc_id = storage.accounts.read().await.len() + 1;
                 account.id = Some(AccountId(acc_id));
                 println!("Last else statement.2");
+                println!("{:#?}", storage.accounts.read().await[&AccountId(1)]);
+                println!("{:#?}", &account);
                 storage
                     .accounts
                     .write()
@@ -81,6 +82,7 @@ pub async fn add_account(
                 // .expect("Could not insert Account into storage2.");
                 println!("iterating");
             }
+            // return Ok(warp::reply::with_status("Account added.2", StatusCode::OK));
         }
 
         Ok(warp::reply::with_status("Account added.2", StatusCode::OK))
