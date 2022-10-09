@@ -77,6 +77,7 @@ pub async fn add_account(
                         .expect("Could not insert id into storage."),
                     account.clone(),
                 );
+                println!("Last else statement.3");
                 // .expect("Could not insert Account into storage2.");
                 println!("iterating");
             }
