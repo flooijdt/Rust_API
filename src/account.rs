@@ -69,6 +69,7 @@ pub async fn add_account(
             } else {
                 println!("Last else statement.");
                 account.id = Some(AccountId(storage.accounts.read().await.len() + 1));
+                println!("Last else statement.2");
                 storage.accounts.write().await.insert(
                     account
                         .clone()
