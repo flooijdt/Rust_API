@@ -75,7 +75,8 @@ pub async fn add_account(
                     .accounts
                     .write()
                     .await
-                    .insert(AccountId(acc_id), account.clone());
+                    .insert(AccountId(acc_id), account.clone())
+                    .expect("Could not insert Account into storage2.");
                 println!("Last else statement.3");
                 // .expect("Could not insert Account into storage2.");
                 println!("iterating");
