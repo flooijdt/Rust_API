@@ -20,7 +20,7 @@ pub struct Account {
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct AccountId(pub i32);
+pub struct AccountId(pub usize);
 
 /** Implements the new function for creating and stanciating `Storage`s. */
 impl Accounts {
@@ -59,7 +59,7 @@ pub async fn add_account(
             .await
             .insert(AccountId(1), account.clone());
         // .expect("Could not insert Account into storage1.");
-        return Ok(warp::reply::with_status("Account added.", StatusCode::OK));
+        Ok(warp::reply::with_status("Account added.1", StatusCode::OK))
     } else {
         for mut acc in storage.accounts.read().await.clone().iter_mut() {
             if acc.1.email == account.email {
@@ -67,8 +67,8 @@ pub async fn add_account(
                 println!("{:#?}", storage.accounts.read().await.len());
                 return Err(warp::reject::custom(Error::AccountAlreadyExist));
             } else {
-                acc_counter += 1;
-                account.id = Some(AccountId(acc_counter).clone()).clone();
+                println!("Last else statement.");
+                account.id = Some(AccountId(storage.accounts.read().await.len() + 1));
                 storage.accounts.write().await.insert(
                     account
                         .clone()
@@ -81,7 +81,7 @@ pub async fn add_account(
             }
         }
 
-        Ok(warp::reply::with_status("Account added.", StatusCode::OK))
+        Ok(warp::reply::with_status("Account added.2", StatusCode::OK))
         // acc.0 = &AccountId(acc_counter).clone();
     }
 }
