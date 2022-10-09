@@ -68,15 +68,14 @@ pub async fn add_account(
                 return Err(warp::reject::custom(Error::AccountAlreadyExist));
             } else {
                 println!("Last else statement.");
-                account.id = Some(AccountId(storage.accounts.read().await.len() + 1));
+                let acc_id = storage.accounts.read().await.len() + 1;
+                account.id = Some(AccountId(acc_id));
                 println!("Last else statement.2");
-                storage.accounts.write().await.insert(
-                    account
-                        .clone()
-                        .id
-                        .expect("Could not insert id into storage."),
-                    account.clone(),
-                );
+                storage
+                    .accounts
+                    .write()
+                    .await
+                    .insert(AccountId(acc_id), account.clone());
                 println!("Last else statement.3");
                 // .expect("Could not insert Account into storage2.");
                 println!("iterating");
