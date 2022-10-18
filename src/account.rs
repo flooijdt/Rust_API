@@ -112,7 +112,7 @@ pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, war
             Err(e) => Err(warp::reject::custom(
                 handle_errors::Error::ArgonLibraryError(e),
             )),
-        },
+        ),
         Err(e) => Err(warp::reject::custom(e)),
     }
 }
