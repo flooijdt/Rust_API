@@ -42,14 +42,7 @@ pub async fn add_account(
 ) -> Result<impl warp::Reply, warp::Rejection> {
     /* Hash and salt password before storing it. */
     hash(account.password.as_bytes());
-    /* Tries to get the Account via its Id. */
-    // let account_given = storage
-    //     .accounts
-    //     .write()
-    //     .await
-    //     .get_mut(&account.id.clone().expect("Could not get requested id."))
-    //     .cloned();
-    /* Returns Error if it finds same email. */
+    /* If storage is empty (it has no accounts) then add account to storage. */
     if storage.accounts.read().await.len() == 0 {
         account.id = Some(AccountId(1));
         storage
@@ -97,22 +90,22 @@ pub fn hash(password: &[u8]) -> String {
     argon2::hash_encoded(password, &salt, &config).expect("Could not hash password.")
 }
 
-pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
-    match store.get_account(login.email).await {
-        Ok(account) => match verify_password(&account.password,
-            Ok(verified) => {
-                if verified {
-                    Ok(warp::reply::json(&issue_token(
-                        account.id.expect("id not found"),
-                    )))
-                } else {
-                    Err(warp::reject::custom(handle_errors::Error::WrongPassword))
-                }
-            }
-            Err(e) => Err(warp::reject::custom(
-                handle_errors::Error::ArgonLibraryError(e),
-            )),
-        ),
-        Err(e) => Err(warp::reject::custom(e)),
-    }
-}
+// pub async fn login(store: Store, login: Account) -> Result<impl warp::Reply, warp::Rejection> {
+//     match store.get_account(login.email).await {
+//         Ok(account) => match verify_password(&account.password,
+//             Ok(verified) => {
+//                 if verified {
+//                     Ok(warp::reply::json(&issue_token(
+//                         account.id.expect("id not found"),
+//                     )))
+//                 } else {
+//                     Err(warp::reject::custom(handle_errors::Error::WrongPassword))
+//                 }
+//             }
+//             Err(e) => Err(warp::reject::custom(
+//                 handle_errors::Error::ArgonLibraryError(e),
+//             )),
+//         ),
+//         Err(e) => Err(warp::reject::custom(e)),
+//     }
+// }
