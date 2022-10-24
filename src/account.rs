@@ -61,9 +61,9 @@ pub async fn add_account(
                 println!("Last else statement.");
                 let acc_id = storage.accounts.read().await.len() + 1;
                 account.id = Some(AccountId(acc_id));
-                println!("Last else statement.2");
                 println!("{:#?}", storage.accounts.read().await[&AccountId(1)]);
                 println!("{:#?}", &account);
+                println!("Last else statement.2. Now it will try to add new account to storage!");
                 storage
                     .accounts
                     .write()
