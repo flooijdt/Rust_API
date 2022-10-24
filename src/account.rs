@@ -50,7 +50,6 @@ pub async fn add_account(
             .write()
             .await
             .insert(AccountId(1), account.clone());
-        // .expect("Could not insert Account into storage1.");
         Ok(warp::reply::with_status("Account added.1", StatusCode::OK))
     } else {
         for mut acc in storage.accounts.read().await.clone().iter_mut() {
@@ -70,16 +69,13 @@ pub async fn add_account(
                     .write()
                     .await
                     .insert(AccountId(acc_id), account.clone());
-                // .expect("Could not insert Account into storage2.");
                 println!("Last else statement.3");
                 // .expect("Could not insert Account into storage2.");
                 println!("iterating");
             }
             // return Ok(warp::reply::with_status("Account added.2", StatusCode::OK));
         }
-        //commentareeo
         Ok(warp::reply::with_status("Account added.2", StatusCode::OK))
-        // acc.0 = &AccountId(acc_counter).clone();
     }
 }
 
