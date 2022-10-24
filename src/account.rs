@@ -54,7 +54,7 @@ pub async fn add_account(
     } else {
         for mut acc in storage.accounts.read().await.clone().iter_mut() {
             if acc.1.email == account.email {
-                println!("pelo menos neh");
+                println!("primeiro if dentro do else.");
                 println!("{:#?}", storage.accounts.read().await.len());
                 return Err(warp::reject::custom(Error::AccountAlreadyExist));
             } else {
@@ -63,7 +63,7 @@ pub async fn add_account(
                 account.id = Some(AccountId(acc_id));
                 println!("{:#?}", storage.accounts.read().await[&AccountId(1)]);
                 println!("{:#?}", &account);
-                println!("Last else statement.2. Now it will try to add new account to storage!");
+                println!("Last else statement.2. Now it will try to add new account to storage!"); //ERRO abaixo!
                 storage
                     .accounts
                     .write()
