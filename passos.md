@@ -6,11 +6,7 @@
 [*] parse clients as struct;
 [*] convert csvs; 
 [*] convert required fields;
-[*] add country's region
-[*] Create API;
-[*] add pagination to API;
-[] change all unwrap functions to expect functions;
-[] add authentication;
-[] transform add account function so it aplies the id itself,
-instead of obtaining it by the user;
-
+  [*] adicionar regiao do país
+[] Create API;
+[] create database;
+[] add pagination to API;

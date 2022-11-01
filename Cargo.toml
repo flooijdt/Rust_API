@@ -2,7 +2,6 @@
 name = "juntos_rust"
 version = "0.1.0"
 edition = "2021"
-author = "flooijdt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,9 +15,3 @@ json = "*"
 tokio = {version = "*", features = ["full"]}
 warp = "*"
 futures = "*"
-csv2json = "*"
-uuid = { version = "*", features = ["v4"] }
-tracing = { version = "*", features = ["log"] }
-tracing-subscriber = { version = "*", features = ["env-filter"] }
-rand = "*"
-rust-argon2 = "*"
