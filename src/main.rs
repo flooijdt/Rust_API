@@ -1,175 +1,178 @@
 use csv::{self, Reader};
 use reqwest::blocking::Response;
 use serde::{de::IntoDeserializer, Deserialize, Deserializer, Serialize};
-use serde_json::{Map, Value, Value::Object, json};
-use std::vec::Vec;
-use warp::{Filter,Error, Rejection, Reply, http::StatusCode, reject::Reject, filters::{cors::CorsForbidden}};
-use tokio::task::spawn_blocking;
+use serde_json::{json, Map, Value, Value::Object};
 use std::collections::HashMap;
+use std::vec::Vec;
+use tokio::task::spawn_blocking;
+use warp::{
+    filters::cors::CorsForbidden, http::StatusCode, reject::Reject, Error, Filter, Rejection, Reply,
+};
+//comment
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Dob {
+    age: u32,
+    date: String,
+}
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Dob {
-        age: u32,
-        date: String,
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Location {
+    city: String,
+    coordinates: Coordinates,
+    postcode: u32,
+    state: String,
+    street: String,
+    timezone: Timezone,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Coordinates {
+    latitude: String,
+    longitude: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Timezone {
+    description: String,
+    offset: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Name {
+    first: String,
+    last: String,
+    title: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Picture {
+    large: String,
+    medium: String,
+    thumbnail: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Registered {
+    age: u32,
+    date: String,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct ClientUnited {
+    cell: String,
+    dob: Dob,
+    email: String,
+    gender: String,
+    location: Location,
+    name: Name,
+    phone: String,
+    picture: Picture,
+    registered: Registered,
+}
+
+impl ClientUnited {
+    fn new(value: Value) -> Self {
+        let client: ClientUnited = serde_json::from_value(value).unwrap();
+        client
     }
+}
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Location {
-        city: String,
-        coordinates: Coordinates,
-        postcode: u32,
-        state: String,
-        street: String,
-        timezone: Timezone,
-    }
+// convert response to Reader, for file tempering.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct ClientCSV {
+    gender: String,
+    name__title: String,
+    name__first: String,
+    name__last: String,
+    location__street: String,
+    location__city: String,
+    location__state: String,
+    location__postcode: u32,
+    location__coordinates__latitude: f64,
+    location__coordinates__longitude: f64,
+    location__timezone__offset: String,
+    location__timezone__description: String,
+    email: String,
+    dob__date: String,
+    dob__age: u32,
+    registered__date: String,
+    registered__age: u32,
+    phone: String,
+    cell: String,
+    picture__large: String,
+    picture__medium: String,
+    picture__thumbnail: String,
+}
+// create final Client struct according to desired output.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Client {
+    id: ClientId,
+    r#type: String,
+    gender: String,
+    name: Name,
+    location: Location2,
+    email: String,
+    birthday: String,
+    registered: String,
+    telephoneNumbers: Vec<String>,
+    mobileNumbers: Vec<String>,
+    picture: Picture,
+    nationality: String,
+}
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Coordinates {
-        latitude: String,
-        longitude: String,
-    }
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Location2 {
+    region: String,
+    city: String,
+    coordinates: Coordinates,
+    postcode: u32,
+    state: String,
+    street: String,
+    timezone: Timezone,
+}
+// clasification in regard to coordinates: special, labourious or normal.
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Timezone {
-        description: String,
-        offset: String,
-    }
+pub struct LocationCoordinates {
+    minlon: f64,
+    minlat: f64,
+    maxlon: f64,
+    maxlat: f64,
+}
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Name {
-        first: String,
-        last: String,
-        title: String,
-    }
+#[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash)]
+pub struct ClientId(String);
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Picture {
-        large: String,
-        medium: String,
-        thumbnail: String,
-    }
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Storage {
+    clients: HashMap<ClientId, Client>,
+}
 
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Registered {
-        age: u32,
-        date: String,
-    }
-
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct ClientUnited {
-        cell: String,
-        dob: Dob,
-        email: String,
-        gender: String,
-        location: Location,
-        name: Name,
-        phone: String,
-        picture: Picture,
-        registered: Registered,
-    }
-
-    impl ClientUnited {
-        fn new(value: Value) -> Self {
-            let client: ClientUnited = serde_json::from_value(value).unwrap();
-            client
+impl Storage {
+    fn new() -> Self {
+        Storage {
+            clients: HashMap::new(),
         }
     }
 
-   // convert response to Reader, for file tempering.
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct ClientCSV {
-        gender: String,
-        name__title: String,
-        name__first: String,
-        name__last: String,
-        location__street: String,
-        location__city: String,
-        location__state: String,
-        location__postcode: u32,
-        location__coordinates__latitude: f64,
-        location__coordinates__longitude: f64,
-        location__timezone__offset: String,
-        location__timezone__description: String,
-        email: String,
-        dob__date: String,
-        dob__age: u32,
-        registered__date: String,
-        registered__age: u32,
-        phone: String,
-        cell: String,
-        picture__large: String,
-        picture__medium: String,
-        picture__thumbnail: String,
-    }
-     // create final Client struct according to desired output.
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Client {
-        id: ClientId,
-        r#type: String,
-        gender: String,
-        name: Name,
-        location: Location2,
-        email: String,
-        birthday: String,
-        registered: String,
-        telephoneNumbers: Vec<String>,
-        mobileNumbers: Vec<String>,
-        picture: Picture,
-        nationality: String,
-    }
-
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Location2 {
-        region: String,
-        city: String,
-        coordinates: Coordinates,
-        postcode: u32,
-        state: String,
-        street: String,
-        timezone: Timezone,
-    }
-    // clasification in regard to coordinates: special, labourious or normal.
-
-    pub struct LocationCoordinates {
-        minlon: f64,
-        minlat: f64,
-        maxlon: f64,
-        maxlat: f64,
-    }
-
-
-    #[derive(Debug, Deserialize, Clone, Serialize, Eq, PartialEq, Hash)]
-    pub struct ClientId (String);
-
-
-    #[derive(Debug, Deserialize, Clone, Serialize)]
-    pub struct Storage { clients: HashMap<ClientId, Client>, }
-
-    impl Storage {
-        fn new() -> Self {
-            Storage{ clients: HashMap::new(), }
-        }
-        
-        fn add_client(mut self, client: Client) -> Self {
+    fn add_client(mut self, client: Client) -> Self {
         self.clients.insert(client.id.clone(), client);
         self
     }
-    }
-    // impl warp::Reply for Storage {
-    //     fn into_response(self) -> warp::reply::Response {
-    //         Response::new(format!("{}", self.json).into())
-    //     }
-    // }
-    //
-
+}
+// impl warp::Reply for Storage {
+//     fn into_response(self) -> warp::reply::Response {
+//         Response::new(format!("{}", self.json).into())
+//     }
+// }
+//
 
 fn get_clients() -> Storage {
     // get Response containing user data from source.
-    
-    
+
     let response_json = reqwest::blocking::get(
         "https://storage.googleapis.com/juntossomosmais-code-challenge/input-backend.json",
-    ).expect("unable to get the origin json.");
+    )
+    .expect("unable to get the origin json.");
 
     // convert Response to json.
     let mut json: Value = serde_json::from_reader(response_json).unwrap();
@@ -264,7 +267,7 @@ fn get_clients() -> Storage {
 
     let mut id_counter = 0;
 
-    for client in json_clients_list.iter() {        
+    for client in json_clients_list.iter() {
         let client = client.clone();
         let mut client: Client = Client {
             id: ClientId(String::from("placeholder")),
@@ -428,7 +431,7 @@ fn get_clients() -> Storage {
 
         id_counter += 1;
     }
-  
+
     // let json_clients_list: Vec<Client> = json_clients_list.into();
     // json_clients_list
     storage
@@ -451,8 +454,8 @@ fn get_clients() -> Storage {
 
 #[tokio::main]
 async fn main() {
-    use warp::http::{Method};
     use tokio::task::spawn_blocking;
+    use warp::http::Method;
 
     //
     // #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -465,7 +468,6 @@ async fn main() {
     // }
 
     // let clientslist: Vec<Client> = clientslist().await;
-
 
     // let mut clientts: Replai = Replai {json: spawn_blocking( || {clientslist()}).await.unwrap().await};
     let cors = warp::cors()
@@ -488,7 +490,7 @@ async fn main() {
     // );
     // warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
 
-//FUNCIONANDO
+    //FUNCIONANDO
     #[derive(Debug)]
     struct InvalidId;
     impl Reject for InvalidId {}
@@ -504,7 +506,7 @@ async fn main() {
                 "No valid ID presented".to_string(),
                 StatusCode::UNPROCESSABLE_ENTITY,
             ))
-        }  else {
+        } else {
             Ok(warp::reply::with_status(
                 "Route not found".to_string(),
                 StatusCode::NOT_FOUND,
@@ -512,13 +514,17 @@ async fn main() {
         }
     }
 
-    let mut clients_spawn = spawn_blocking(move || {get_clients()}).await.unwrap().clone();
-
+    let mut clients_spawn = spawn_blocking(move || get_clients()).await.unwrap().clone();
 
     // let route = warp::get().and(warp::path!("clients" / usize)).and(warp::path::end()).map(move |id| warp::reply::json(&clients_spawn.0[id])).with(cors).recover(return_error)   ;
 
-    let route = warp::get().and(warp::path("clients")).and(warp::path::end()).map(move || warp::reply::json(&clients_spawn.clients[&ClientId(1.to_string())])).with(cors).recover(return_error)   ;
+    let route = warp::get()
+        .and(warp::path("clients"))
+        .and(warp::path::end())
+        .map(move || warp::reply::json(&clients_spawn.clients[&ClientId(1.to_string())]))
+        .with(cors)
+        .recover(return_error);
 
     warp::serve(route).run(([127, 0, 0, 1], 3030)).await;
-//FUNCIONANDO
+    //FUNCIONANDO
 }
